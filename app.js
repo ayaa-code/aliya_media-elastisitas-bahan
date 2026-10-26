@@ -1,9 +1,9 @@
 import {topics,questions,EBOOK} from './content.js';
 import {LEVELS,freshProgress,score,answerOnce,advance,addBonus} from './core.js';
-import {heroArt,lessonArt,scene} from './visuals.js';
+import {heroArt,lessonArt} from './visuals.js';
 import * as store from './store.js';
 import {mountVideos,cleanupVideos} from './videos.js';
-import {createTrail} from './trail.js';
+import {createTrail,scene} from './journey.js';
 import {spriteHero} from './bouncie-sprite.js';
 let trail=null;
 
@@ -72,21 +72,23 @@ function speak(index){
  speechSynthesis.speak(utterance);statusSpeech(index,'Menyiapkan narasi…');
 }
 function persist(){store.saveProgress(game);}
-function points(){return score(game.answers,questions,game.bonus);}
-function gameTop(){return `<div class="game-head"><div class="spaced"><div><span class="eyebrow">Bouncie’s Spring Trail · ${game.phase==='done'?'Complete':'Level '+(game.level+1)+' of 5'}</span><h1>${game.phase==='done'?'Well done, explorer!':LEVELS[game.level].title}</h1></div><div class="row"><div class="level-steps" aria-label="Progres lima level">${LEVELS.map((_,i)=>`<span class="level-dot ${i<game.answers.length?'complete':i===game.level?'active':''}" ${i===game.level?'aria-current="step"':''}>${i<game.answers.length?'✓':i+1}</span>`).join('')}</div><span class="points" id="score-chip" aria-live="polite" aria-label="Skor ${points()}">⭐ ${points()}</span></div></div></div>`;}
+function points(){return game.adventure||0;}
+function gameTop(){return `<div class="game-head"><div class="spaced"><div><span class="eyebrow">Bouncie’s Spring Trail · ${game.phase==='done'?'Complete':'Level '+(game.level+1)+' of 5'}</span><h1>${game.phase==='done'?'Well done, explorer!':LEVELS[game.level].title}</h1></div><div class="row"><div class="level-steps" aria-label="Progres lima level">${LEVELS.map((_,i)=>`<span class="level-dot ${i<game.answers.length?'complete':i===game.level?'active':''}" ${i===game.level?'aria-current="step"':''}>${i<game.answers.length?'✓':i+1}</span>`).join('')}</div><span class="points" id="score-chip" title="Adventure Points" aria-live="polite" aria-label="Skor ${points()}">⭐ ${points()}</span></div></div></div>`;}
 function renderGame(){
  trail?.destroy();trail=null;
  if(game.phase==='done'){renderScore();return;}
- if(!gameStarted&&game.phase==='setup'&&game.level===0&&!game.checkpoint){
- main.innerHTML=`<div class="shell"><button class="quiet" data-action="home">← Back to Dashboard</button><section class="panel game-intro">${spriteHero()}<span class="eyebrow">5 trails · 5 star challenges</span><h1>Bouncie’s Spring Trail</h1><p>Lompat antarplatform, lewati rintangan, lalu tangkap bintang untuk membuka kuis.</p><ol class="instruction-list"><li>Tahan ← / → atau A / D untuk berjalan.</li><li>Tekan Space, ↑, W, atau tombol Jump untuk melompat.</li><li>⭐ hanya muncul sekali di setiap level. Jawab soal satu kali.</li><li>Capai bendera finish untuk lanjut. Jatuh? Kembali ke checkpoint aman.</li></ol><button class="btn" data-action="start-game">Start Adventure →</button></section></div>`;return;
+ if(!gameStarted&&game.phase==='setup'&&game.level===0&&game.checkpoint.x<=75){
+ main.innerHTML=`<div class="shell"><button class="quiet" data-action="home">← Back to Dashboard</button><section class="panel game-intro">${spriteHero()}<span class="eyebrow">5 trails · 5 star challenges</span><h1>Bouncie’s Spring Trail</h1><p>Jelajahi dunia yang terus bergulir, hindari rintangan dan pengejar, lalu tangkap lima bintang kuis.</p><ol class="instruction-list"><li>Tahan ← / → atau A / D untuk berjalan.</li><li>Tekan Space, ↑, W, atau tombol Jump untuk melompat.</li><li>⭐ hanya muncul sekali di setiap level. Jawab soal satu kali.</li><li>Level tersambung sepanjang jalur. Finish berada di akhir level kelima.</li><li>Adventure Points: rintangan +5, level +25, jatuh −5, tertangkap −10. Learning Score dari kuis tetap aman.</li></ol><label class="check" style="justify-content:center;margin:1rem"><input type="checkbox" data-relaxed ${game.relaxed?'checked':''}> Relaxed Mode · bermain tanpa tangkapan pengejar</label><button class="btn" data-action="start-game">Start Adventure →</button></section></div>`;return;
  }
  gameStarted=true;
- main.innerHTML=`<div class="shell">${gameTop()}<p class="game-goal muted">Lompati celah dan rintangan · ⭐ ${game.answers.length}/5 Challenges</p><section class="world-wrap trail-world">${scene()}</section><div class="move-controls"><button class="move-btn" data-trail="left" aria-label="Bergerak kiri">←</button><button class="move-btn jump-btn" data-trail="jump" aria-label="Lompat">↑ Jump</button><button class="move-btn" data-trail="right" aria-label="Bergerak kanan">→</button></div><p id="game-status" class="trail-help" role="status">Tahan kiri/kanan untuk berjalan. Tekan Jump untuk melompati celah.</p><p class="tiny muted trail-help">Keyboard: A/D atau ←/→ · Space/W/↑ untuk lompat · Tanpa batas waktu.</p></div>`;
- trail=createTrail({root:main,level:game.level,checkpoint:game.checkpoint,answered:game.answers.length>game.level,reduced,
- onCheckpoint(){game.checkpoint=1;persist();},
+ main.innerHTML=`<div class="shell">${gameTop()}<p class="game-goal muted"><span id="challenge-count">⭐ ${game.answers.length}/5 Challenges</span> · <button class="quiet" data-action="pause-game">⏸ Pause</button></p><section class="world-wrap trail-world">${scene()}</section><div class="move-controls"><button class="move-btn" data-trail="left" aria-label="Bergerak kiri">←</button><button class="move-btn jump-btn" data-trail="jump" aria-label="Lompat">↑ Jump</button><button class="move-btn" data-trail="right" aria-label="Bergerak kanan">→</button></div><p id="game-status" class="trail-help" role="status">Tahan kiri/kanan untuk berjalan. Tekan Jump untuk melompati celah.</p><p class="tiny muted trail-help">Keyboard: A/D atau ←/→ · Space/W/↑ untuk lompat · Tanpa batas waktu.</p></div>`;
+ trail=createTrail({root:main,progress:game,reduced,
+ onCheckpoint(cp){game.checkpoint=cp;persist();},
  onStar(){game.phase='quiz';persist();showQuiz();},
- onFinish(){game.level++;game.checkpoint=0;game.phase=game.level===5?'done':'setup';persist();renderGame();renderHeader();},
- onFall(){const current=points();addBonus(game,-Math.min(5,current));persist();const label=$('#game-status');if(label)label.textContent='Try again! Kembali ke checkpoint aman.';$('#score-chip').textContent='⭐ '+points();}
+ onLevel(next){game.level=next;persist();$('.game-head').outerHTML=gameTop();},
+ onFinish(){game.level=5;game.phase='done';persist();renderGame();renderHeader();},
+ onReward(amount){addBonus(game,amount);persist();$('#score-chip').textContent='⭐ '+points();},
+ onPenalty(amount){addBonus(game,-amount);persist();$('#score-chip').textContent='⭐ '+points();}
  });
  if(game.phase==='quiz'||game.phase==='feedback')trail.pause();
  if(game.phase==='quiz')showQuiz();if(game.phase==='feedback')showFeedback();
@@ -99,10 +101,10 @@ function showFeedback(){
  const q=questions[game.level],correct=game.answers[game.level]===q.answer;
  openModal(`<div class="modal-content"><span class="feedback-icon" aria-hidden="true">${correct?'🎉':'💡'}</span><span>${correct?'+20 poin':'Belajar lagi'}</span><h2 id="modal-title">${correct?'Correct! Great elasticity thinking!':'Not quite—let’s learn from it!'}</h2><p><strong>Jawaban benar: ${'ABCDE'[q.answer]}.</strong> ${q.explanation}</p><button class="btn ${correct?'':'secondary'}" data-action="continue">Continue Journey →</button></div>`,true);
 }
-function choose(choice){if(!answerOnce(game,choice))return;persist();renderHeader();showFeedback();}
+function choose(choice){if(!answerOnce(game,choice))return;persist();renderHeader();$('#challenge-count').textContent='⭐ '+game.answers.length+'/5 Challenges';showFeedback();}
 function renderScore(){
- const total=points(),correct=game.answers.filter((a,i)=>a===questions[i].answer).length,message=correct===5?'Luar biasa! Semua konsep berhasil kamu tangkap.':correct>=3?'Petualangan selesai! Pertahankan rasa ingin tahumu.':'Terima kasih sudah mencoba! Buka materi lagi lalu pantul lebih tinggi.';
- main.innerHTML=`<div class="shell"><section class="panel score-panel"><div class="celebration" aria-hidden="true"><span>⭐</span><span>🎉</span><span>✨</span></div><span class="eyebrow">Five Star Challenges completed</span><h1 lang="en">Bouncie’s Spring Trail Complete!</h1><div class="score-big">${total}</div><p><strong>${correct} dari 5 jawaban benar · 5/5 level selesai</strong></p><div style="max-width:230px;margin:auto">${spriteHero()}</div><p class="muted" style="margin-top:1rem">${message}</p><details class="review"><summary>Lihat pembahasan lima Star Challenge</summary>${questions.map((q,i)=>`<article><h3>${i+1}. ${q.title}</h3><p>Jawabanmu: ${'ABCDE'[game.answers[i]]}. ${q.options[game.answers[i]]}</p><p><strong>Kunci: ${'ABCDE'[q.answer]}</strong> · ${q.explanation}</p></article>`).join('')}</details><div class="row"><button class="btn" data-action="replay">Play Again ↻</button><button class="quiet" data-action="home">Back to Dashboard</button></div></section></div>`;
+ const total=score(game.answers,questions),correct=game.answers.filter((a,i)=>a===questions[i].answer).length,message=correct===5?'Luar biasa! Semua konsep berhasil kamu tangkap.':correct>=3?'Petualangan selesai! Pertahankan rasa ingin tahumu.':'Terima kasih sudah mencoba! Buka materi lagi lalu pantul lebih tinggi.';
+ main.innerHTML=`<div class="shell"><section class="panel score-panel"><div class="celebration" aria-hidden="true"><span>⭐</span><span>🎉</span><span>✨</span></div><span class="eyebrow">Five Star Challenges completed</span><h1 lang="en">Bouncie’s Spring Trail Complete!</h1><div class="score-big">${total}<small> / 100</small></div><p>Learning Score</p><p class="adventure-result">⭐ Adventure Points: <strong>${points()}</strong></p><p><strong>${correct} dari 5 jawaban benar · 5/5 level selesai</strong></p><div style="max-width:230px;margin:auto">${spriteHero()}</div><p class="muted" style="margin-top:1rem">${message}</p><details class="review"><summary>Lihat pembahasan lima Star Challenge</summary>${questions.map((q,i)=>`<article><h3>${i+1}. ${q.title}</h3><p>Jawabanmu: ${'ABCDE'[game.answers[i]]}. ${q.options[game.answers[i]]}</p><p><strong>Kunci: ${'ABCDE'[q.answer]}</strong> · ${q.explanation}</p></article>`).join('')}</details><div class="row"><button class="btn" data-action="replay">Play Again ↻</button><button class="quiet" data-action="home">Back to Dashboard</button></div></section></div>`;
 }
 function openModal(html,mandatory=false){
  returnFocus=document.activeElement;mandatoryModal=mandatory;modal.innerHTML=html;if(!modal.open)modal.showModal();
@@ -134,6 +136,9 @@ document.addEventListener('click',e=>{
   case 'game':game=store.progress();gameStarted=game.level>0||game.phase!=='setup';navigate('game');break;
   case 'start-game':gameStarted=true;renderGame();renderHeader();$('#world')?.focus?.({preventScroll:true});break;
   case 'continue':if(advance(game)){persist();closeModal();trail?.resume(true);renderHeader();$('#score-chip').textContent='⭐ '+points();main.focus({preventScroll:true});}break;
+  case 'pause-game':trail?.pause();openModal(`<div class="modal-content"><h2 id="modal-title">Petualangan dijeda</h2><p>Tahan A/D atau ←/→ untuk bergerak. Space/W/↑ untuk lompat. Bintang membuka kuis.</p><label class="check"><input type="checkbox" data-relaxed ${game.relaxed?'checked':''}> Relaxed Mode · tanpa tangkapan pengejar</label><button class="btn" data-action="resume-game">Lanjut bermain →</button><button class="link-button" data-action="exit-game">Back to Dashboard</button></div>`,true);break;
+  case 'resume-game':closeModal();trail?.resume();break;
+  case 'exit-game':closeModal();navigate('dashboard');break;
   case 'replay':case 'reset':confirmReset();break;
   case 'confirm-reset':store.resetProgress();game=freshProgress();gameStarted=false;closeModal();navigate('game');break;
   case 'close-modal':closeModal();break;
@@ -144,6 +149,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',e=>{
  const node=e.target;
+ if(node.hasAttribute('data-relaxed')){game.relaxed=node.checked;persist();}
  if(node.dataset.pref){pref[node.dataset.pref]=node.checked;store.savePrefs(pref);applyPrefs();}
  if(node.dataset.rate!==undefined){pref.rate=Number(node.value);store.savePrefs(pref);if(speechIndex===Number(node.dataset.rate))speak(speechIndex);}
 });

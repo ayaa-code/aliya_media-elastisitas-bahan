@@ -1,5 +1,9 @@
 # Pengujian Stretch & Measure
 
+Versi perjalanan bergulir: browser Edge menuntaskan jalur 9.000 unit dan kelima kuis dalam Relaxed Mode. Kamera mengikuti, waktu dan pengejar membeku saat popup, refresh setelah kuis tidak membuka soal lagi, dua skor tampil terpisah, finish berfungsi dan halaman 320 px tidak overflow. Tes terpisah memverifikasi tangkapan −10 hanya sekali sebelum perlindungan, jarak aman respawn, jawaban kuis tetap tersimpan, dan Relaxed Mode tidak menangkap. Lima uji inti dan pemeriksaan sintaks lulus. Screenshot arena bergulir desktop dan arena ponsel diperiksa visual. Safari/iPhone fisik belum diuji.
+
+Kontrol multi-touch juga diuji melalui Chrome DevTools Protocol pada Edge: menahan tombol kanan dengan satu sentuhan lalu menekan Jump menggunakan sentuhan kedua membuat posisi maju dan karakter melompat. Ini simulasi input browser, bukan uji ponsel fisik.
+
 Pembaruan karakter: atlas 12 pose transparan telah diperiksa visual; Bouncie bergaya 3D tampak di arena tanpa latar gambar atau label. Uji browser tambahan memeriksa frame berjalan berubah, arah kiri tercermin, dan frame membeku saat popup. Area tabrakan tetap terpisah dari gambar. Animasi memakai empat pose berjalan, bukan interpolasi tulang 3D.
 
 Revisi 27 Oktober 2026: permainan diganti dengan Bouncie’s Spring Trail. Uji inti memeriksa penguncian jawaban, skor, pemulihan checkpoint/feedback, dan syarat finish terpisah dari kuis. Uji browser terbaru tersedia pada scripts/trail-check.cjs; laporan versi trampolin berikut adalah riwayat pengujian sebelumnya.

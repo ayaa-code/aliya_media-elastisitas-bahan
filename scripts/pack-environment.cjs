@@ -1,0 +1,2 @@
+const sharp=require(process.env.SHARP_MODULE||'sharp');
+(async()=>{if(process.argv[2])await sharp(process.argv[2]).resize(1440,960,{fit:'cover'}).webp({quality:86}).toFile('assets/journey-background.webp');if(process.argv[3])await sharp(process.argv[3]).trim().resize(192,192,{fit:'inside'}).webp({quality:90,alphaQuality:100}).toFile('assets/chaser.webp');})().catch(e=>{console.error(e);process.exitCode=1;});

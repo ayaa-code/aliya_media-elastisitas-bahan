@@ -2,6 +2,12 @@
 
 Explore, Stretch, and Learn.
 
+## Versi perjalanan bergulir
+
+Mesin game aktif berada di journey.js: dunia 9.000 unit dengan lima bagian tersambung, kamera mengikuti pada x layar 350/960, rintangan batang kayu/batu, platform bergerak, pegas bantu, dan finish tunggal. Pengejar ungu berjalan mendekat; tertangkap −10 Adventure Points, jatuh/terbentur −5. Perlindungan sesudah respawn mencegah penalti berulang. Relaxed Mode tersedia sebelum mulai dan melalui Pause. Latar 3D buatan AI terpisah dari awan, pengunjung langit, pepohonan dekat, platform, karakter, dan pengejar SVG bergradasi.
+
+Learning Score kini khusus kuis (0–100). Adventure Points terpisah: rintangan +5 dan level +25, masing-masing hanya sekali. Progres versi 4 menyimpan checkpoint koordinat, jawaban, klaim bonus, mode dan poin; data lama dimigrasikan dengan jawaban dipertahankan. Pause menghentikan waktu dunia dan pengejar. Uji terbaru: scripts/journey-check.cjs dan scripts/chaser-check.cjs. Bagian di bawah menjelaskan evolusi awal game; mekanik skor terbaru mengikuti bagian ini.
+
 Media Fisika SMA XI tentang elastisitas bahan dan pegas. Akun demo, Learning Library dengan lima submateri/audio/video, dan permainan Bouncie’s Spring Trail.
 
 ## Jalankan
