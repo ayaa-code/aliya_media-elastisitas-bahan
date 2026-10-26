@@ -4,9 +4,9 @@ import {answerOnce,advance,freshProgress,restoreProgress,score,addBonus} from '.
 import {questions} from '../content.js';
 test('jawaban terkunci, benar bernilai 20, salah tetap lanjut',()=>{
  const p=freshProgress();p.phase='quiz';assert.equal(answerOnce(p,1),true);assert.equal(answerOnce(p,0),false);assert.equal(score(p.answers,questions),20);assert.equal(advance(p),true);
- p.phase='quiz';assert.equal(answerOnce(p,0),true);assert.equal(score(p.answers,questions),20);assert.equal(advance(p),true);assert.equal(p.level,2);
+ p.level=1;p.phase='quiz';assert.equal(answerOnce(p,0),true);assert.equal(score(p.answers,questions),20);assert.equal(advance(p),true);assert.equal(p.level,1);
 });
-test('lima jawaban benar tepat 100 dan berakhir',()=>{const p=freshProgress();for(const q of questions){p.phase='quiz';answerOnce(p,q.answer);advance(p);}assert.equal(score(p.answers,questions),100);assert.equal(p.phase,'done');assert.equal(advance(p),false);});
-test('pemulihan feedback membuat jawaban tetap terkunci',()=>{const p=restoreProgress({version:2,level:0,phase:'feedback',answers:[1],bonus:5});assert.equal(p.phase,'feedback');assert.equal(answerOnce(p,0),false);advance(p);assert.equal(p.level,1);assert.equal(p.bonus,5);});
+test('lima jawaban benar tepat 100 tetapi finish tetap diperlukan',()=>{const p=freshProgress();for(const q of questions){p.phase='quiz';answerOnce(p,q.answer);advance(p);p.level++;}assert.equal(score(p.answers,questions),100);assert.equal(p.phase,'setup');assert.equal(advance(p),false);});
+test('pemulihan feedback membuat jawaban tetap terkunci',()=>{const p=restoreProgress({version:3,level:0,phase:'feedback',answers:[1],bonus:5,checkpoint:1});assert.equal(p.phase,'feedback');assert.equal(answerOnce(p,0),false);advance(p);assert.equal(p.level,0);assert.equal(p.checkpoint,1);assert.equal(p.bonus,5);});
 test('pemulihan quiz mempertahankan level dan data tidak sah diabaikan',()=>{const p=restoreProgress({version:2,phase:'quiz',answers:[1],bonus:10});assert.equal(p.level,1);assert.equal(p.phase,'quiz');assert.deepEqual(restoreProgress({version:2,answers:[9,1]}).answers,[]);});
 test('koleksi dan benda terlewat mengubah bonus tanpa membuat skor negatif',()=>{const p=freshProgress();addBonus(p,10);addBonus(p,-5);assert.equal(p.bonus,5);assert.equal(score([],questions,-99),0);});
