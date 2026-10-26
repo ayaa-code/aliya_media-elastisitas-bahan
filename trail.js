@@ -1,3 +1,4 @@
+import {mountBouncie} from './bouncie-sprite.js';
 // Small deterministic platformer. Coordinates are world pixels; player.y is feet position.
 export function layout(level){
  const raised=level>=2;
@@ -6,29 +7,36 @@ export function layout(level){
 export function createTrail({root,level,checkpoint=0,answered,onStar,onCheckpoint,onFinish,onFall,reduced}){
  const svg=root.querySelector('svg'),world=layout(level),keys=new Set();let raf=0,last=0,time=0,paused=false,disposed=false,starTaken=answered;
  let player={x:checkpoint?700:75,y:390,vy:0,grounded:true},safe=checkpoint?700:75,invulnerable=0;
+ let assetsReady=false,facing=1,landing=0,reaction=0,celebrating=false;
+ const sprite=mountBouncie(svg.querySelector('#trail-player'));
+ sprite.loaded.then(ok=>{assetsReady=true;const status=root.querySelector('#game-status');if(status)status.textContent=ok?'Siap! Tahan kiri/kanan dan tekan Jump.':'Aset 3D belum termuat. Karakter cadangan aktif; muat ulang untuk mencoba lagi.';});
+ const loadingStatus=root.querySelector('#game-status');if(loadingStatus)loadingStatus.textContent='Menyiapkan Bouncie…';
  const platforms=world.platforms;
  function draw(){
   const moving=level>=3&&!reduced()?Math.sin(time/1800)*15:0;platforms[1].y=(level>=2?355:390)+moving;
   svg.querySelector('#platforms').innerHTML=platforms.map(p=>`<g><rect x="${p.x}" y="${p.y}" width="${p.w}" height="110" rx="12" fill="#bc9465"/><rect x="${p.x}" y="${p.y}" width="${p.w}" height="15" rx="7" fill="#4b8a24"/><path d="M${p.x+8} ${p.y+3}h${p.w-16}" stroke="#9acb00" stroke-width="6"/></g>`).join('');
   svg.querySelector('#hazards').innerHTML=world.hazards.map(h=>`<rect x="${h.x}" y="${h.y}" width="${h.w}" height="${h.h}" rx="10" fill="#e88a62" stroke="#183f72" stroke-width="3"/>`).join('');
   svg.querySelector('#trail-star').style.display=starTaken?'none':'';
-  svg.querySelector('#trail-player').setAttribute('transform',`translate(${player.x} ${player.y-57}) scale(.82)`);
+  const walking=player.grounded&&(keys.has('right')||keys.has('left'));
+  const state=celebrating?'happy':reaction>0?'hurt':!player.grounded?(player.vy<0?'jump':'fall'):landing>0?'land':walking?'walk':'idle';
+  sprite.draw({x:player.x,y:player.y,state,time,facing,reduced:reduced()});
   svg.dataset.x=player.x.toFixed(1);svg.dataset.y=player.y.toFixed(1);svg.dataset.grounded=String(player.grounded);
  }
- function jump(){if(!paused&&player.grounded){player.vy=-560;player.grounded=false;}}
- function respawn(){player={x:safe,y:390,vy:0,grounded:true};invulnerable=1200;onFall();}
+ function jump(){if(assetsReady&&!paused&&player.grounded){player.vy=-560;player.grounded=false;landing=0;}}
+ function respawn(){player={x:safe,y:390,vy:0,grounded:true};invulnerable=1200;reaction=350;onFall();}
  function frame(now){
   if(disposed)return;const dt=Math.min((now-last||16)/1000,.025);last=now;
   if(document.querySelector('dialog[open]')||document.hidden)keys.clear();
-  if(!paused&&!document.hidden&&!document.querySelector('dialog[open]')){
-   time+=dt*1000;invulnerable-=dt*1000;const oldY=player.y;
-   player.x=Math.max(25,Math.min(935,player.x+((keys.has('right')?1:0)-(keys.has('left')?1:0))*230*dt));
+  if(assetsReady&&!paused&&!document.hidden&&!document.querySelector('dialog[open]')){
+   time+=dt*1000;invulnerable-=dt*1000;landing-=dt*1000;reaction-=dt*1000;const oldY=player.y,wasGrounded=player.grounded;
+   if(keys.has('right'))facing=1;else if(keys.has('left'))facing=-1;
+   player.x=Math.max(45,Math.min(915,player.x+((keys.has('right')?1:0)-(keys.has('left')?1:0))*230*dt));
    player.vy+=1350*dt;player.y+=player.vy*dt;player.grounded=false;
-   for(const p of platforms)if(player.x+18>p.x&&player.x-18<p.x+p.w&&oldY<=p.y+7&&player.y>=p.y&&player.vy>=0){player.y=p.y;player.vy=0;player.grounded=true;break;}
+   for(const p of platforms)if(player.x+18>p.x&&player.x-18<p.x+p.w&&oldY<=p.y+7&&player.y>=p.y&&player.vy>=0){player.y=p.y;player.vy=0;player.grounded=true;if(!wasGrounded)landing=100;break;}
    if(player.x>=685&&player.grounded&&safe!==700){safe=700;onCheckpoint();}
    if(player.y>550)respawn();
    if(invulnerable<=0&&world.hazards.some(h=>player.x+16>h.x&&player.x-16<h.x+h.w&&player.y>h.y&&player.y-65<h.y+h.h))respawn();
-   if(!starTaken&&Math.abs(player.x-world.star.x)<35&&Math.abs(player.y-42-world.star.y)<48){starTaken=true;safe=700;paused=true;keys.clear();onCheckpoint();onStar();}
+   if(!starTaken&&Math.abs(player.x-world.star.x)<35&&Math.abs(player.y-42-world.star.y)<48){starTaken=true;safe=700;paused=true;celebrating=true;keys.clear();onCheckpoint();onStar();}
    if(player.x>=world.finish&&player.grounded){if(starTaken&&answered){paused=true;onFinish();}else root.querySelector('#scene-caption').textContent='Ambil ⭐ dan jawab Star Challenge terlebih dahulu.';}
   }
   draw();raf=requestAnimationFrame(frame);
@@ -38,5 +46,5 @@ export function createTrail({root,level,checkpoint=0,answered,onStar,onCheckpoin
  const cleanups=[];
  root.querySelectorAll('[data-trail]').forEach(button=>{const direction=button.dataset.trail;const down=e=>{e.preventDefault();button.setPointerCapture?.(e.pointerId);if(direction==='jump')jump();else keys.add(direction);};const up=()=>keys.delete(direction);const click=e=>{if(e.detail===0){if(direction==='jump')jump();else{player.x+=direction==='left'?-35:35;draw();}}};button.addEventListener('pointerdown',down);button.addEventListener('pointerup',up);button.addEventListener('pointercancel',up);button.addEventListener('lostpointercapture',up);button.addEventListener('click',click);cleanups.push(()=>{button.removeEventListener('pointerdown',down);button.removeEventListener('pointerup',up);button.removeEventListener('click',click);});});
  const blur=()=>keys.clear();window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);window.addEventListener('blur',blur);draw();raf=requestAnimationFrame(frame);
- return {pause(){paused=true;keys.clear();},resume(done=false){answered=done||answered;paused=false;keys.clear();player={x:safe,y:390,vy:0,grounded:true};},destroy(){disposed=true;cancelAnimationFrame(raf);window.removeEventListener('keydown',keydown);window.removeEventListener('keyup',keyup);window.removeEventListener('blur',blur);cleanups.forEach(fn=>fn());}};
+ return {pause(){paused=true;keys.clear();},resume(done=false){answered=done||answered;paused=false;celebrating=false;keys.clear();player={x:safe,y:390,vy:0,grounded:true};},destroy(){disposed=true;sprite.destroy();cancelAnimationFrame(raf);window.removeEventListener('keydown',keydown);window.removeEventListener('keyup',keyup);window.removeEventListener('blur',blur);cleanups.forEach(fn=>fn());}};
 }

@@ -10,6 +10,8 @@ Gunakan Node.js modern lalu jalankan npm run dev. Buka http://127.0.0.1:5180. Da
 
 ## Bouncie’s Spring Trail
 
+Bouncie di game kini memakai sprite transparan bergaya 3D berdasarkan desain yang disetujui: 12 pose dalam atlas WebP sekitar 301 KiB. Tangan dan kaki berganti pose pada siklus berjalan empat frame; ada pose kedip, naik, turun, mendarat, senang, dan kaget. Ini animasi sprite, bukan model 3D real-time. Rincian frame, titik pijak, proses aset, dan prompt ada di docs/BOUNCIE-ASSETS.md.
+
 Bouncie perempuan berambut cokelat dengan kuncir dan ikat rambut kuning, kaus turquoise bergambar pegas, celana kuning, dan sepatu. Tahan A/D atau ←/→ untuk bergerak; Space, W, ↑, atau tombol Jump untuk melompat. Tombol sentuh dapat ditahan sambil menekan Jump.
 
 Lima level: First Steps, Little Leap, Springy Path, Careful Bounce, dan Final Trail. Platform rumput, celah pendek, rintangan balok, serta platform bergerak lambat di level akhir. Tidak ada double jump atau batas waktu.

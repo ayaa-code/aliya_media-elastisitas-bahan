@@ -6,6 +6,6 @@
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "test": "node --test tests/core.test.js",
-    "check": "node --check app.js && node --check trail.js && node --check content.js && node --check core.js && node --check visuals.js && node --check store.js && node --check videos.js && node --check scripts/serve.mjs"
+    "check": "node --check app.js && node --check trail.js && node --check bouncie-sprite.js && node --check content.js && node --check core.js && node --check visuals.js && node --check store.js && node --check videos.js && node --check scripts/serve.mjs"
   }
 }

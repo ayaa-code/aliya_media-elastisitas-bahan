@@ -1,5 +1,7 @@
 # Pengujian Stretch & Measure
 
+Pembaruan karakter: atlas 12 pose transparan telah diperiksa visual; Bouncie bergaya 3D tampak di arena tanpa latar gambar atau label. Uji browser tambahan memeriksa frame berjalan berubah, arah kiri tercermin, dan frame membeku saat popup. Area tabrakan tetap terpisah dari gambar. Animasi memakai empat pose berjalan, bukan interpolasi tulang 3D.
+
 Revisi 27 Oktober 2026: permainan diganti dengan Bouncie’s Spring Trail. Uji inti memeriksa penguncian jawaban, skor, pemulihan checkpoint/feedback, dan syarat finish terpisah dari kuis. Uji browser terbaru tersedia pada scripts/trail-check.cjs; laporan versi trampolin berikut adalah riwayat pengujian sebelumnya.
 
 Hasil revisi: 5 uji inti dan sintaks lulus. Browser Edge berhasil menuntaskan kelima level dengan kontrol keyboard, lima bintang dan kuis, game berhenti saat popup, Escape terkunci, refresh setelah jawaban tanpa soal berulang, finish level terakhir, jumlah jawaban benar, skor tidak negatif, dan tampilan hasil 320 px tanpa overflow. Tidak ada JavaScript error pada alur tersebut. Screenshot arena desktop diperiksa visual. Safari/iPhone fisik belum diuji.
