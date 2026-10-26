@@ -2,7 +2,7 @@
 
 Explore, Stretch, and Learn.
 
-Media pembelajaran Fisika SMA kelas XI tentang elastisitas bahan pada pegas. Materi singkat dan narasi Bahasa Indonesia dilengkapi game orisinal **Spring Quest** bersama Bouncie, makhluk pegas kuning yang memantul ke lima pulau.
+Media pembelajaran Fisika SMA kelas XI tentang elastisitas bahan pada pegas. Materi singkat dan narasi Bahasa Indonesia dilengkapi game orisinal **Trampoline Quest** bersama Bouncie, anak kecil ramah berkaus bergambar pegas.
 
 ## Menjalankan
 
@@ -17,13 +17,13 @@ Buka http://127.0.0.1:5180. Buat akun demo melalui **Create account**, lalu masu
 ## Alur dan fitur
 
 - Login / registrasi lokal dengan nama, email, password, konfirmasi, Remember me, dan show/hide password.
-- Dashboard berbahasa Inggris dengan tepat dua kartu: Learn & Explore dan Spring Quest.
+- Dashboard berbahasa Inggris dengan tepat dua kartu: Learn & Explore dan Trampoline Quest.
 - Lima submateri: benda elastis/plastis, pertambahan panjang, Hukum Hooke, konstanta pegas, serta batas elastis dan energi potensial.
 - Narasi per submateri: putar, jeda, stop, kecepatan 0.75–1.5×. Ketersediaan suara Indonesia bergantung pada browser/perangkat.
 - Video YouTube per topik dan e-book resmi Kemendikbud. Tiga video relevan diverifikasi melalui oEmbed YouTube dan digunakan pada lima submateri. Video hanya dimuat saat tombol dipilih, tanpa autoplay. Kesalahan pemutar menampilkan tautan cadangan.
-- Game lima level: massa total 200–600 g, tiga pegas (80/140/220 N/m), pemampatan 4–30 cm.
-- Satu peluncuran di setiap level, dilanjut checkpoint meski lompatan gagal.
-- Lima soal PG A–E; satu jawaban per soal, dikunci dan disimpan sebelum feedback. Benar 20, salah 0, maksimum 100.
+- Game trampolin lima level: Bouncie memantul otomatis; siswa menggeser kiri/kanan dengan tombol, panah keyboard, atau A/D.
+- Tangkap 🌀 pegas (+5), kartu rumus atau energi (+10); koleksi terlewat −5 dan skor tidak pernah kurang dari nol.
+- Tangkap ⭐ bintang untuk menjeda arena dan membuka satu Star Challenge. Lima soal PG A–E dikunci setelah satu jawaban; benar +20, salah +0.
 - Popup pembahasan dan tombol Lanjutkan; tidak ada navigasi ke soal sebelumnya.
 - Penyimpanan progres per akun, termasuk popup yang belum dilanjutkan ketika refresh.
 - Play Again dan Reset Progres memerlukan konfirmasi.
@@ -36,21 +36,13 @@ Ini demonstrasi lokal, bukan autentikasi produksi. Akun dan progres hanya tersed
 
 Remember me memakai localStorage; jika tidak dicentang, sesi memakai sessionStorage. Bila penyimpanan dibatasi browser, aplikasi memberi pemberitahuan dan mempertahankan data di memori selama masih terbuka.
 
-## Model fisika
+## Kaitan dengan fisika
 
-Materi eksperimen vertikal memakai keadaan setimbang kΔx = mg. Game memakai model pelontar ideal pada sudut 45° dan titik awal/akhir setinggi sama:
-
-- E = ½kx²
-- v = √(2E/m)
-- R = v²/g, dengan g = 10 m/s²
-
-Gesekan udara, massa pegas, dan perubahan tinggi selama dorongan pegas diabaikan. Visual diperlambat dan disederhanakan untuk pengamatan; jarak model tetap dihitung dari persamaan. Gambar lintasan yang terlalu jauh dibatasi area layar agar tidak merusak tampilan, sedangkan angka jarak model tetap ditampilkan.
-
-Pegas lunak/sedang/kaku memiliki batas pemampatan model 24/22/20 cm. Nilai ini adalah asumsi desain, bukan hasil pengukuran pegas asli. Jika batas dilampaui, peluncuran dibatalkan dan energi linear tidak diekstrapolasi. Batas proporsional dan batas elastis dijelaskan sebagai konsep berbeda. Pada pegas nyata, elastis belum tentu linear.
+Game ini bukan simulasi numerik peluncuran. Trampolin menjadi konteks permainan yang sederhana, sedangkan konsep fisika diuji melalui Star Challenge: benda elastis/plastis, pertambahan panjang akibat beban, Hukum Hooke F = kΔx, konstanta pegas, batas elastis, dan energi potensial Eₚ = ½kx². Ini mencegah mekanik game yang rumit menghalangi pemahaman konsep.
 
 ## Mengisi ilustrasi soal
 
-Gambar lima soal sengaja belum dibuat, sesuai permintaan. Placeholder berada di fungsi renderQuiz dalam app.js, dengan teks “Visual soal akan ditambahkan.” Semua informasi yang diperlukan untuk menjawab tetap ditulis dalam soal. Tambahkan aset dan alt text yang menjelaskan data pada gambar saat ilustrasi sudah tersedia.
+Gambar lima soal sengaja belum dibuat, sesuai permintaan. Placeholder berada di popup Star Challenge dalam app.js, dengan teks “Visual soal akan ditambahkan.” Semua informasi yang diperlukan untuk menjawab tetap ditulis dalam soal. Tambahkan aset dan alt text yang menjelaskan data pada gambar saat ilustrasi sudah tersedia.
 
 Kelima soal merupakan adaptasi konsep untuk game, bukan salinan verbatim lima nomor soal dari modul.
 
@@ -62,12 +54,12 @@ Kelima soal merupakan adaptasi konsep untuk game, bukan salinan verbatim lima no
 | styles.css | Desain responsif dan aksesibilitas |
 | app.js | Navigasi, narasi, game, kuis, popup, dan hasil |
 | content.js | Lima ringkasan materi dan lima soal |
-| core.js | Model fisika dan mesin status progres |
+| core.js | Mesin skor, status progres, dan penguncian jawaban |
 | store.js | Akun demo, sesi, preferensi, progres |
 | visuals.js | SVG orisinal Bouncie, diagram, dan dunia game |
 | videos.js | Pemutar YouTube dengan tautan cadangan |
 | scripts/serve.mjs | Server lokal |
-| tests/core.test.js | Pengujian fisika dan kunci progres |
+| tests/core.test.js | Pengujian skor dan kunci progres |
 | scripts/browser-check.cjs | Pengujian browser end-to-end |
 
 ## Verifikasi

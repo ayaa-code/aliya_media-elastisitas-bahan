@@ -1,6 +1,6 @@
-import {topics,questions,EBOOK,outcomeText} from './content.js';
-import {KINDS,LEVELS,freshProgress,simulate,score,answerOnce,advance} from './core.js';
-import {heroArt,lessonArt,scene,bouncie,coil} from './visuals.js';
+import {topics,questions,EBOOK} from './content.js';
+import {LEVELS,freshProgress,score,answerOnce,advance,addBonus} from './core.js';
+import {heroArt,lessonArt,scene} from './visuals.js';
 import * as store from './store.js';
 import {mountVideos,cleanupVideos} from './videos.js';
 
@@ -8,10 +8,9 @@ const main=document.querySelector('#main'),header=document.querySelector('#heade
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let route='auth',authMode='login',game=store.progress(),gameStarted=false,busy=false,animation=0,animationGeneration=0;
-let config={mass:0.3,kind:1,x:0.16},returnFocus=null,mandatoryModal=false,noticeTimer;
+let returnFocus=null,mandatoryModal=false,noticeTimer,playerX=480,gameItems=[],lastFrame=0,lastSpawn=0,starSpawned=false;
 const pref=store.prefs();
 const reduced=()=>pref.reduce||matchMedia('(prefers-reduced-motion: reduce)').matches;
-const fmt=(n,d=2)=>Number(n).toLocaleString('id-ID',{maximumFractionDigits:d});
 function notify(text){const node=$('#notice');node.textContent=text;node.hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>node.hidden=true,6000);}
 function applyPrefs(){for(const name of ['large','contrast','reduce'])document.documentElement.classList.toggle(name,!!pref[name]);}
 applyPrefs();
@@ -48,7 +47,7 @@ document.addEventListener('submit',async e=>{
 });
 function renderDashboard(){
  const name=esc(store.user().name.split(' ')[0]);
- main.innerHTML=`<div class="shell dashboard"><section class="panel welcome"><div><span class="eyebrow" lang="en">Spring into discovery ✨</span><h1 lang="en">Welcome, ${name}!</h1><h2 lang="en">Discover how springs stretch,<br>store energy, and bounce back.</h2><p lang="en">Every little stretch begins a new discovery. Learn at your own pace, then put your ideas into motion with Bouncie.</p></div><div class="hero-art">${heroArt()}</div></section><div class="card-grid"><button class="panel dashboard-card" data-action="learn"><span class="card-number">01 / LEARN</span><span class="card-emoji" aria-hidden="true">📚</span><h2 lang="en">Learn & Explore</h2><p lang="en">Read, listen, and watch the essentials of spring elasticity.</p><span class="card-cta" lang="en">Open Lessons <span aria-hidden="true">↗</span></span></button><button class="panel dashboard-card game-card" data-action="game"><span class="card-number">02 / PLAY</span><span class="card-emoji" aria-hidden="true">🎮</span><h2 lang="en">Spring Quest</h2><p lang="en">Launch Bouncie, answer checkpoints, and earn points.</p><span class="card-cta" lang="en">Play Now <span aria-hidden="true">↗</span></span></button></div></div>`;
+ main.innerHTML=`<div class="shell dashboard"><section class="panel welcome"><div><span class="eyebrow" lang="en">Spring into discovery ✨</span><h1 lang="en">Welcome, ${name}!</h1><h2 lang="en">Discover how springs stretch,<br>store energy, and bounce back.</h2><p lang="en">Every little stretch begins a new discovery. Learn at your own pace, then put your ideas into motion with Bouncie.</p></div><div class="hero-art">${heroArt()}</div></section><div class="card-grid"><button class="panel dashboard-card" data-action="learn"><span class="card-number">01 / LEARN</span><span class="card-emoji" aria-hidden="true">📚</span><h2 lang="en">Learn & Explore</h2><p lang="en">Read, listen, and watch the essentials of spring elasticity.</p><span class="card-cta" lang="en">Open Lessons <span aria-hidden="true">↗</span></span></button><button class="panel dashboard-card game-card" data-action="game"><span class="card-number">02 / PLAY</span><span class="card-emoji" aria-hidden="true">🎮</span><h2 lang="en">Trampoline Quest</h2><p lang="en">Catch learning collectibles, unlock Star Challenges, and earn points.</p><span class="card-cta" lang="en">Play Now <span aria-hidden="true">↗</span></span></button></div></div>`;
 }
 function renderLearn(){
  main.innerHTML=`<div class="shell"><button class="quiet back" data-action="home">← Back to Dashboard</button><div class="screen-intro"><span class="eyebrow">Learning Library · Fisika SMA XI</span><h1>Elastisitas Bahan pada Pegas</h1><p class="muted">Baca pelan-pelan, dengarkan penjelasannya, dan hubungkan setiap konsep dengan percobaan pegasmu.</p></div><nav class="lesson-nav" aria-label="Daftar submateri">${topics.map((t,i)=>`<a href="#topic-${i}">${i+1}. ${esc(t.title)}</a>`).join('')}</nav><div class="lesson-list">${topics.map((t,i)=>`<article class="panel lesson" id="topic-${i}"><div class="lesson-title"><span class="topic-num">${i+1}</span><div><span class="eyebrow">${esc(t.tag)}</span><h2>${esc(t.title)}</h2></div></div><div class="lesson-grid"><div class="lesson-copy">${t.paragraphs.map(p=>`<p>${esc(p)}</p>`).join('')}${t.formula?`<div class="formula">${esc(t.formula)}</div><p class="example">${esc(t.example)}</p>`:''}</div><div class="lesson-visual">${lessonArt(t.visual)}</div></div><div class="takeaway">💡 ${esc(t.takeaway)}</div><div class="audio-box" data-topic="${i}"><div><div class="audio-label">🔊 Dengarkan materi</div><div class="audio-status" id="speech-${i}" aria-live="polite">Siap diputar</div></div><div class="row"><button data-action="speak" data-topic="${i}" aria-label="Putar narasi ${esc(t.title)}">▶ Putar</button><button data-action="pause-speech" data-topic="${i}" aria-label="Jeda narasi ${esc(t.title)}">⏸ Jeda</button><button data-action="stop-speech" data-topic="${i}" aria-label="Hentikan narasi ${esc(t.title)}">■ Stop</button><label class="tiny" for="rate-${i}">Kecepatan</label><select id="rate-${i}" data-rate="${i}">${[0.75,1,1.25,1.5].map(r=>`<option value="${r}" ${Number(pref.rate||1)===r?'selected':''}>${r}×</option>`).join('')}</select></div></div><div class="video"><h3>🎬 Tonton penjelasan</h3><p>Jelajahi video Bahasa Indonesia tentang ${esc(t.title.toLowerCase())}. Pemutaran tersemat belum diverifikasi, jadi tautan pencarian disediakan agar tidak menampilkan player yang rusak.</p><a class="quiet" href="https://www.youtube.com/results?search_query=${encodeURIComponent(t.query)}" target="_blank" rel="noopener noreferrer">Cari video di YouTube ↗</a></div><p class="source">Rujukan: Modul Elastisitas Bahan (2020), ${t.pages}. Ringkasan dan ilustrasi disusun ulang untuk pembelajaran ini.</p></article>`).join('')}</div><section class="panel ebook"><div><span class="eyebrow" style="color:#bce876">Read a little further</span><h2>Unduh E-Book Elastisitas Bahan</h2><p>Modul resmi Direktorat SMA, Kemendikbud (2020). Perluas pemahamanmu tentang elastisitas dan pegas.</p></div><a class="btn yellow" href="${EBOOK}" target="_blank" rel="noopener noreferrer">↓ Buka / Unduh PDF</a></section></div>`;
@@ -70,65 +69,56 @@ function speak(index){
  speechSynthesis.speak(utterance);statusSpeech(index,'Menyiapkan narasi…');
 }
 function persist(){store.saveProgress(game);}
-function gameTop(){return `<div class="game-head"><div class="spaced"><div><span class="eyebrow">Spring Quest · ${game.phase==='done'?'Complete':'Level '+(game.level+1)+' of 5'}</span><h1>${game.phase==='done'?'Well done, explorer!':LEVELS[game.level].title}</h1></div><div class="row"><div class="level-steps" aria-label="Progres lima level">${LEVELS.map((_,i)=>`<span class="level-dot ${i<game.answers.length?'complete':i===game.level?'active':''}" ${i===game.level?'aria-current="step"':''}>${i<game.answers.length?'✓':i+1}</span>`).join('')}</div><span class="points" aria-label="Skor ${score(game.answers,questions)} dari 100">⭐ ${score(game.answers,questions)} / 100</span></div></div></div>`;}
+function points(){return score(game.answers,questions,game.bonus);}
+function gameTop(){return `<div class="game-head"><div class="spaced"><div><span class="eyebrow">Trampoline Quest · ${game.phase==='done'?'Complete':'Level '+(game.level+1)+' of 5'}</span><h1>${game.phase==='done'?'Well done, explorer!':LEVELS[game.level].title}</h1></div><div class="row"><div class="level-steps" aria-label="Progres lima level">${LEVELS.map((_,i)=>`<span class="level-dot ${i<game.answers.length?'complete':i===game.level?'active':''}" ${i===game.level?'aria-current="step"':''}>${i<game.answers.length?'✓':i+1}</span>`).join('')}</div><span class="points" id="score-chip" aria-live="polite" aria-label="Skor ${points()}">⭐ ${points()}</span></div></div></div>`;}
 function renderGame(){
  if(game.phase==='done'){renderScore();return;}
  if(!gameStarted&&game.phase==='setup'&&game.level===0){
-  main.innerHTML=`<div class="shell"><button class="quiet" data-action="home">← Back to Dashboard</button><section class="panel game-intro">${heroArt()}<span class="eyebrow">5 islands · 5 discoveries</span><h1>Spring Quest</h1><p>Bantu Bouncie melompat dengan energi pegas. Coba sebuah kombinasi, lihat hasilnya, lalu jawab satu pertanyaan.</p><ol class="instruction-list"><li>Atur massa, jenis pegas, dan besar pemampatan. Klik <strong>Launch</strong>.</li><li>Lihat hasil lompatan. Berhasil maupun belum, lanjut ke checkpoint.</li><li>Jawab A–E <strong>satu kali</strong>. Benar +20, salah +0; keduanya tetap lanjut.</li><li>Lima checkpoint, maksimal 100 poin. Tidak ada batas waktu.</li></ol><button class="btn" data-action="start-game">Mulai petualangan →</button><p class="tiny muted">Kontrol klik, sentuh, atau keyboard. Pengaturan tersimpan agar kamu bisa melanjutkan nanti.</p></section></div>`;return;
+  main.innerHTML=`<div class="shell"><button class="quiet" data-action="home">← Back to Dashboard</button><section class="panel game-intro">${heroArt()}<span class="eyebrow">5 levels · 5 star challenges</span><h1>Trampoline Quest</h1><p>Bouncie memantul otomatis. Geser ke kiri atau kanan untuk menangkap koleksi. Tangkap <strong>⭐ bintang</strong> untuk membuka soal.</p><ol class="instruction-list"><li>Gunakan tombol panah, <strong>← / →</strong>, atau <strong>A / D</strong> untuk bergerak.</li><li>Tangkap 🌀 pegas (+5), kartu rumus atau energi (+10).</li><li>Bintang membuka satu soal A–E. Jawab hanya sekali: benar +20.</li><li>Koleksi yang terlewat mengurangi 5 poin, tetapi permainan tetap lanjut.</li></ol><button class="btn" data-action="start-game">Mulai memantul →</button><p class="tiny muted">Lima bintang, lima pertanyaan, tanpa batas waktu.</p></section></div>`;return;
  }
  gameStarted=true;
- if(game.phase==='quiz'||game.phase==='feedback'){renderQuiz();return;}
- const level=LEVELS[game.level];
- main.innerHTML=`<div class="shell">${gameTop()}<p class="muted" style="margin-bottom:1rem">${level.goal} Target: <strong>${fmt(level.target)} m</strong>.</p><div class="game-layout"><div><div class="world-wrap">${scene()}</div><div class="readouts" aria-live="polite"><div class="readout"><span>Gaya pegas saat ditekan</span><strong id="force">—</strong></div><div class="readout"><span>Energi tersimpan</span><strong id="energy">—</strong></div><div class="readout"><span>Batas pemampatan</span><strong id="limit">—</strong></div></div><div id="launch-result" aria-live="polite"></div></div><section class="panel controls" aria-label="Pengaturan peluncuran"><h2 style="font-size:1.2rem">Prepare your bounce</h2><div class="control"><label for="mass">Massa total: <output id="mass-value">300 g</output></label><input id="mass" type="range" min="200" max="600" step="50" value="${config.mass*1000}" aria-describedby="mass-help"><p class="tiny muted" id="mass-help">Bouncie + beban yang dibawa</p></div><div class="control"><fieldset><legend>Jenis pegas</legend><div class="spring-options">${KINDS.map((s,i)=>`<label><input type="radio" name="kind" value="${i}" ${i===config.kind?'checked':''}> ${s.name}<small>${s.k} N/m</small></label>`).join('')}</div></fieldset></div><div class="control"><label for="compression">Pemampatan: <output id="compression-value">16 cm</output></label><input id="compression" type="range" min="4" max="30" step="1" value="${config.x*100}" aria-describedby="compression-help"><p class="tiny muted" id="compression-help">Tekan pegas dari panjang alaminya.</p></div><p id="spring-warning" class="warning" role="status"></p><button class="btn" data-action="launch">Launch Bouncie ↗</button></section></div><p class="model-note">Simulasi edukatif ideal · Sudut 45° · Gravitasi 10 m/s² · Platform awal dan target setinggi sama.</p><details class="model-details"><summary>Bagaimana fisika lompatan dihitung?</summary><p>Eₚ = ½kx² diubah menjadi ½mv². Jarak horizontal R = v²/g pada sudut 45° dan tinggi akhir yang sama. Gesekan udara, massa pegas, dan perubahan tinggi selama pegas mendorong diabaikan. Batas pemampatan adalah asumsi tiap pegas. Di luar batas itu, peluncuran dihentikan. Poin berasal dari kuis, bukan keberhasilan lompatan.</p></details></div>`;
- updateControls();
+ main.innerHTML=`<div class="shell">${gameTop()}<p class="muted game-goal">${LEVELS[game.level].goal}</p><div class="trampoline-layout"><section class="world-wrap trampoline-world" aria-label="Arena trampolin. Gunakan tombol kiri dan kanan untuk menggerakkan Bouncie.">${scene()}</section><aside class="panel how-to"><h2>Cara Main</h2><div class="rule"><b>⭐ Catch stars</b><span>Bintang membuka Star Challenge.</span></div><div class="rule"><b>← → Move</b><span>Geser Bouncie untuk menangkap koleksi.</span></div><div class="rule"><b>Miss = −5</b><span>Terlewat? Coba lagi di lompatan berikutnya.</span></div><p id="game-status" class="tiny muted" role="status">Bouncie siap memantul.</p></aside></div><div class="move-controls" aria-label="Kontrol gerak Bouncie"><button class="move-btn" data-action="move-left" aria-label="Geser Bouncie ke kiri">←</button><p>Geser Bouncie<br><kbd>←</kbd> <kbd>→</kbd> atau <kbd>A</kbd> <kbd>D</kbd></p><button class="move-btn" data-action="move-right" aria-label="Geser Bouncie ke kanan">→</button></div></div>`;
+ startBounce();
+ if(game.phase==='quiz')showQuiz();if(game.phase==='feedback')showFeedback();
 }
-function updateControls(){
- if(!$('#mass'))return;
- $('#mass-value').textContent=`${fmt(config.mass*1000,0)} g`;$('#compression-value').textContent=`${fmt(config.x*100,0)} cm`;
- const result=simulate(config,LEVELS[game.level].target),spring=KINDS[config.kind];
- $('#force').textContent=result.outcome==='limit'?'Di luar model':`${fmt(result.force)} N`;
- $('#energy').textContent=result.outcome==='limit'?'Di luar model':`${fmt(result.energy)} J`;
- $('#limit').textContent=`${spring.limit*100} cm`;
- $('#spring-warning').textContent=result.outcome==='limit'?'⚠ Melebihi batas pemampatan. Uji akan menampilkan peringatan.':'';
- const length=52-config.x*100;$('#launch-coil').setAttribute('d',coil(116,300-length,length,18,4));$('#actor').setAttribute('transform',`translate(116 ${300-length-24}) scale(.52)`);
-}
-async function launch(){
- if(busy||game.phase!=='setup')return;busy=true;
- for(const node of $$('.controls input,.controls button'))node.disabled=true;
- const result=simulate(config,LEVELS[game.level].target),session=++animationGeneration;
- // Persist checkpoint before animation, so refresh cannot unlock a past answer or add points twice.
- game.launches[game.level]={...result,config:{...config}};game.phase='quiz';persist();
- const world=$('#world'),actor=$('#actor'),path=$('#flight-path'),caption=$('#scene-caption');
- if(result.outcome!=='limit'){
-  const visualRange=Math.min(820,result.range/LEVELS[game.level].target*554),height=Math.min(220,visualRange/4);
-  path.setAttribute('d',`M116 267 Q${116+visualRange/2} ${267-height*2} ${116+visualRange} 267`);
-  caption.textContent='Bouncie melompat…';
-  await new Promise(resolve=>{
-   if(reduced()){actor.setAttribute('transform',`translate(${116+visualRange} 267) scale(.52)`);resolve();return;}
-   const start=performance.now();function step(now){if(session!==animationGeneration){resolve();return;}const t=Math.min((now-start)/1600,1),x=116+visualRange*t,y=267-4*height*t*(1-t);actor.setAttribute('transform',`translate(${x} ${y}) scale(.52)`);if(t<1)animation=requestAnimationFrame(step);else resolve();}animation=requestAnimationFrame(step);
-  });
+function itemMarkup(item){const map={star:'⭐',spring:'🌀',formula:'F = kΔx',energy:'½kx²'};return `<g data-id="${item.id}" transform="translate(${item.x} ${item.y})"><rect x="-34" y="-25" width="68" height="50" rx="14" fill="${item.type==='star'?'#fff4c9':'white'}" stroke="#173b6c" stroke-width="3"/><text text-anchor="middle" dominant-baseline="central" font-size="${item.type==='star'?'30':'16'}" font-weight="900" fill="#173b6c">${map[item.type]}</text></g>`;}
+function startBounce(){cancelAnimationFrame(animation);playerX=480;gameItems=[];lastFrame=0;lastSpawn=performance.now();starSpawned=false;animation=requestAnimationFrame(tick);}
+function spawn(type){gameItems.push({id:crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`,type,x:type==='star'?playerX:110+Math.random()*740,y:-30,speed:LEVELS[game.level].speed+(Math.random()*.04)});}
+function tick(now){
+ if(route!=='game'||game.phase!=='setup')return;
+ const dt=Math.min((now-lastFrame||16),40);lastFrame=now;
+ if(!starSpawned&&now-lastSpawn>1100){spawn('star');starSpawned=true;lastSpawn=now;}else if(starSpawned&&now-lastSpawn>1700){spawn(['spring','formula','energy'][Math.floor(Math.random()*3)]);lastSpawn=now;}
+ const actor=$('#actor'),group=$('#collectibles');if(!actor||!group)return;
+ const bounce=reduced()?0:Math.abs(Math.sin(now/360))*76;
+ actor.setAttribute('transform',`translate(${playerX} ${350-bounce}) scale(.7)`);
+ for(const item of gameItems)item.y+=item.speed*dt;
+ for(const item of [...gameItems]){
+  const actorY=350-bounce;
+  if(Math.abs(item.x-playerX)<58&&Math.abs(item.y-actorY)<62){catchItem(item);break;}
+  if(item.y>460){gameItems=gameItems.filter(v=>v!==item);addBonus(game,-5);persist();flash('−5',false);}
  }
- if(session!==animationGeneration||route!=='game')return;
- const [title,text]=outcomeText[result.outcome];caption.textContent=title;
- world.setAttribute('aria-label',`${title} ${text}`);
- $('#launch-result').innerHTML=`<div class="result-banner"><h2>${result.outcome==='success'?'⭐':'💡'} ${title}</h2><p>${text}</p>${result.outcome!=='limit'?`<p class="tiny muted">Jarak model: ${fmt(result.range)} m · Target: ${fmt(LEVELS[game.level].target)} m.</p>`:''}<button class="btn secondary" data-action="checkpoint">Buka checkpoint →</button></div>`;
- busy=false;$('#launch-result button').focus({preventScroll:true});
+ group.innerHTML=gameItems.map(itemMarkup).join('');
+ animation=requestAnimationFrame(tick);
 }
-function renderQuiz(){
- const q=questions[game.level],locked=game.phase==='feedback';
- main.innerHTML=`<div class="shell">${gameTop()}<section class="panel quiz" aria-labelledby="question-title"><span class="eyebrow">Checkpoint ${game.level+1} · ${q.title}</span><div class="image-placeholder"><span aria-hidden="true">▧</span>Visual soal akan ditambahkan.</div><h2 id="question-title">${q.prompt}</h2><div class="options">${q.options.map((o,i)=>`<button class="option ${locked&&game.answers[game.level]===i?'chosen':''}" data-choice="${i}" ${locked?'disabled':''}><span class="letter">${'ABCDE'[i]}</span><span>${o}</span></button>`).join('')}</div><p class="quiz-note">Satu kesempatan menjawab. Benar +20 poin; salah +0 poin dan tetap lanjut.</p></section></div>`;
- if(locked)showFeedback();
+function movePlayer(direction){if(game.phase!=='setup'||route!=='game')return;playerX=Math.max(75,Math.min(885,playerX+(direction*58)));}
+function flash(text,good){const status=$('#game-status'),chip=$('#score-chip');if(status)status.textContent=`${good?'✨':'💥'} ${text}`;if(chip){chip.textContent=`⭐ ${points()}`;chip.classList.add(good?'gain':'loss');setTimeout(()=>chip?.classList.remove('gain','loss'),500);}}
+function catchItem(item){
+ gameItems=gameItems.filter(v=>v!==item);
+ if(item.type==='star'){cancelAnimationFrame(animation);game.phase='quiz';persist();flash('⭐ Star Challenge!',true);showQuiz();return;}
+ const add=item.type==='spring'?5:10;addBonus(game,add);persist();flash(`+${add}`,true);
+}
+function showQuiz(){
+ const q=questions[game.level];
+ openModal(`<div class="modal-content star-quiz"><span class="feedback-icon" aria-hidden="true">⭐</span><span class="eyebrow">Star Challenge · Question ${game.level+1} of 5</span><h2 id="modal-title">${q.title}</h2><p class="muted">Answer this question to continue your trampoline quest.</p><div class="image-placeholder"><span aria-hidden="true">▧</span>Visual soal akan ditambahkan.</div><h3>${q.prompt}</h3><div class="options">${q.options.map((o,i)=>`<button class="option" data-choice="${i}"><span class="letter">${'ABCDE'[i]}</span><span>${o}</span></button>`).join('')}</div><p class="quiz-note">Satu kesempatan menjawab. Benar +20 poin.</p></div>`,true);
 }
 function showFeedback(){
  const q=questions[game.level],correct=game.answers[game.level]===q.answer;
- openModal(`<div class="modal-content"><span class="feedback-icon" aria-hidden="true">${correct?'🎉':'💡'}</span><span>${correct?'+20 poin':'+0 poin'}</span><h2 id="modal-title">${correct?'Benar, nice discovery!':'Belum tepat. Yuk, pahami bersama.'}</h2><p>${q.explanation}</p><button class="btn ${correct?'':'secondary'}" data-action="continue">Lanjutkan →</button></div>`,true);
+ openModal(`<div class="modal-content"><span class="feedback-icon" aria-hidden="true">${correct?'🎉':'💡'}</span><span>${correct?'+20 poin':'Belajar lagi'}</span><h2 id="modal-title">${correct?'Correct! Great elasticity thinking!':'Not quite—let’s learn from it!'}</h2><p><strong>Jawaban benar: ${'ABCDE'[q.answer]}.</strong> ${q.explanation}</p><button class="btn ${correct?'':'secondary'}" data-action="continue">Continue Jumping →</button></div>`,true);
 }
-function choose(choice){
- if(!answerOnce(game,choice))return;persist();for(const option of $$('.option'))option.disabled=true;renderQuiz();renderHeader();
-}
+function choose(choice){if(!answerOnce(game,choice))return;persist();renderHeader();showFeedback();}
 function renderScore(){
- const points=score(game.answers,questions),message=points===100?'Luar biasa! Semua konsep berhasil kamu kenali.':points>=60?'Petualangan selesai! Pertahankan rasa ingin tahumu dan pelajari lagi bagian yang masih sulit.':'Terima kasih sudah mencoba! Buka materi lagi, lalu coba petualangan baru saat kamu siap.';
- main.innerHTML=`<div class="shell"><section class="panel score-panel"><div class="celebration" aria-hidden="true"><span>⭐</span><span>🏆</span><span>✨</span></div><span class="eyebrow">Five islands. So many discoveries.</span><h1 lang="en">Spring Quest Complete!</h1><div class="score-big">${points}<small> / 100</small></div><p><strong>${points/20} dari 5 jawaban benar</strong></p><p class="muted" style="margin-top:1rem">${message}</p><details class="review"><summary>Lihat pembahasan lima checkpoint</summary>${questions.map((q,i)=>`<article><h3>${i+1}. ${q.title}</h3><p>Jawabanmu: ${'ABCDE'[game.answers[i]]}. ${q.options[game.answers[i]]}</p><p><strong>Kunci: ${'ABCDE'[q.answer]}</strong> · ${q.explanation}</p></article>`).join('')}</details><div class="row"><button class="btn" data-action="replay">Play Again ↻</button><button class="quiet" data-action="home">Back to Dashboard</button></div></section></div>`;
+ const total=points(),correct=game.answers.filter((a,i)=>a===questions[i].answer).length,message=correct===5?'Luar biasa! Semua konsep berhasil kamu tangkap.':correct>=3?'Petualangan selesai! Pertahankan rasa ingin tahumu.':'Terima kasih sudah mencoba! Buka materi lagi lalu pantul lebih tinggi.';
+ main.innerHTML=`<div class="shell"><section class="panel score-panel"><div class="celebration" aria-hidden="true"><span>⭐</span><span>🎉</span><span>✨</span></div><span class="eyebrow">Five Star Challenges completed</span><h1 lang="en">Trampoline Quest Complete!</h1><div class="score-big">${total}</div><p><strong>${correct} dari 5 jawaban benar</strong></p><p class="muted" style="margin-top:1rem">${message}</p><details class="review"><summary>Lihat pembahasan lima Star Challenge</summary>${questions.map((q,i)=>`<article><h3>${i+1}. ${q.title}</h3><p>Jawabanmu: ${'ABCDE'[game.answers[i]]}. ${q.options[game.answers[i]]}</p><p><strong>Kunci: ${'ABCDE'[q.answer]}</strong> · ${q.explanation}</p></article>`).join('')}</details><div class="row"><button class="btn" data-action="replay">Play Again ↻</button><button class="quiet" data-action="home">Back to Dashboard</button></div></section></div>`;
 }
 function openModal(html,mandatory=false){
  returnFocus=document.activeElement;mandatoryModal=mandatory;modal.innerHTML=html;if(!modal.open)modal.showModal();
@@ -150,7 +140,7 @@ document.addEventListener('click',e=>{
  const target=e.target.closest('[data-action]');if(!target||target.disabled)return;const action=target.dataset.action;e.preventDefault();
  switch(action){
   case 'home':navigate(store.user()?'dashboard':'auth');break;
-  case 'brand-locked':notify('Selesaikan checkpoint yang sedang dimainkan untuk melanjutkan.');break;
+  case 'brand-locked':notify('Selesaikan Star Challenge yang sedang dimainkan untuk melanjutkan.');break;
   case 'settings':settings();break;
   case 'auth-switch':authMode=authMode==='login'?'register':'login';renderAuth();break;
   case 'toggle-password':{const input=$('#'+target.dataset.for),show=input.type==='password';input.type=show?'text':'password';target.textContent=show?'Sembunyi':'Lihat';target.setAttribute('aria-pressed',String(show));target.setAttribute('aria-label',`${show?'Sembunyikan':'Tampilkan'} kata sandi`);break;}
@@ -158,10 +148,10 @@ document.addEventListener('click',e=>{
   case 'logout':if(modal.open)closeModal();store.logout();game=freshProgress();gameStarted=false;navigate('auth');break;
   case 'learn':navigate('learn');break;
   case 'game':game=store.progress();gameStarted=game.level>0||game.phase!=='setup';navigate('game');break;
-  case 'start-game':gameStarted=true;renderGame();renderHeader();$('#mass')?.focus({preventScroll:true});break;
-  case 'launch':launch();break;
-  case 'checkpoint':renderQuiz();main.focus({preventScroll:true});break;
-  case 'continue':if(advance(game)){persist();closeModal();config={mass:0.3,kind:1,x:0.16};renderGame();renderHeader();window.scrollTo(0,0);main.focus({preventScroll:true});}break;
+  case 'start-game':gameStarted=true;renderGame();renderHeader();$('#world')?.focus?.({preventScroll:true});break;
+  case 'move-left':movePlayer(-1);break;
+  case 'move-right':movePlayer(1);break;
+  case 'continue':if(advance(game)){persist();closeModal();renderGame();renderHeader();window.scrollTo(0,0);main.focus({preventScroll:true});}break;
   case 'replay':case 'reset':confirmReset();break;
   case 'confirm-reset':store.resetProgress();game=freshProgress();gameStarted=false;closeModal();navigate('game');break;
   case 'close-modal':closeModal();break;
@@ -170,14 +160,8 @@ document.addEventListener('click',e=>{
   case 'stop-speech':if(speechIndex===Number(target.dataset.topic))stopSpeech();break;
  }
 });
-document.addEventListener('input',e=>{
- if(busy||game.phase!=='setup')return;
- if(e.target.id==='mass'){config.mass=Number(e.target.value)/1000;updateControls();}
- if(e.target.id==='compression'){config.x=Number(e.target.value)/100;updateControls();}
-});
 document.addEventListener('change',e=>{
  const node=e.target;
- if(node.name==='kind'&&!busy&&game.phase==='setup'){config.kind=Number(node.value);updateControls();}
  if(node.dataset.pref){pref[node.dataset.pref]=node.checked;store.savePrefs(pref);applyPrefs();}
  if(node.dataset.rate!==undefined){pref.rate=Number(node.value);store.savePrefs(pref);if(speechIndex===Number(node.dataset.rate))speak(speechIndex);}
 });
@@ -185,4 +169,9 @@ window.addEventListener('pagehide',()=>{stopSpeech();cleanupVideos();cancelAnima
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&speechIndex!==null){speechSynthesis.pause();statusSpeech(speechIndex,'Narasi dijeda. Tekan Putar untuk melanjutkan.');}});
 // Browser back/forward cannot reopen a past checkpoint: the persisted state is authoritative.
 window.addEventListener('popstate',()=>{if(route==='game'){game=store.progress();renderGame();renderHeader();}});
+window.addEventListener('keydown',e=>{
+ if(route!=='game'||modal.open||game.phase!=='setup')return;
+ if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){e.preventDefault();movePlayer(-1);}
+ if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){e.preventDefault();movePlayer(1);}
+});
 navigate(store.user()?'dashboard':'auth');

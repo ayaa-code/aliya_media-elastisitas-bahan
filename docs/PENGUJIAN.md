@@ -4,13 +4,12 @@
 
 ## Otomatis
 
-- 8 pengujian inti lulus: perhitungan energi/jarak ideal, pengaruh massa dan k, penolakan parameter tidak sah, batas model, penguncian jawaban, skor 100, pemulihan feedback, urutan checkpoint.
+- 5 pengujian inti lulus: penguncian jawaban, skor lima jawaban benar, pemulihan feedback/kuis, serta poin koleksi yang tidak membuat skor negatif.
 - Pemeriksaan sintaks JavaScript lulus.
-- 42 pemeriksaan browser Microsoft Edge lulus, tanpa JavaScript error pada alur yang diperiksa.
-- Alur browser meliputi registrasi, login, logout, validasi, sambutan personal, tepat dua kartu, materi/audio/video cadangan, e-book, pengaturan akses, lima level dan checkpoint, refresh pada feedback, benar 100, salah tetap lanjut, batas model, dan konfirmasi reset.
+- 15 pemeriksaan browser Microsoft Edge lulus pada revisi game trampolin, tanpa JavaScript error pada alur yang diperiksa.
+- Alur baru memeriksa registrasi, dua kartu dashboard, responsivitas, kontrol klik dan keyboard, bintang yang menjeda game, popup A–E, placeholder gambar, umpan balik +20, Escape yang tidak menutup popup wajib, dan kembali ke arena setelah Continue.
 - Dashboard diuji tanpa overflow horizontal pada 320, 375, 768, 1024, 1440 px. Materi diuji pada 375 px, game pada 320 dan 375 px.
-- 13 pemeriksaan tambahan lulus: keyboard pada kartu/slider/checkpoint, penguncian fokus dialog, Escape pengaturan, animasi normal, audio putar/jeda/lanjut/stop/kecepatan, audio tidak didukung, error video dan retry. Integrasi audio serta error video diuji dengan stub untuk mengisolasi perilaku aplikasi, bukan membuktikan keluaran suara fisik.
-- Pengujian utama browser menggunakan reduced motion agar hasil stabil. Animasi normal dan keyboard diperiksa pada rangkaian tambahan tersebut.
+- Pengujian tambahan terdahulu untuk audio/video tetap relevan pada bagian materi. Integrasi audio serta error video diuji dengan stub untuk mengisolasi perilaku aplikasi, bukan membuktikan keluaran suara fisik.
 - Deployment produksi merespons HTTP 200 tanpa login Vercel. Rangkaian 42 pemeriksaan juga lulus pada deployment pertama; patch video akhir diverifikasi lagi secara lokal sebelum deployment berikutnya.
 
 ## Keterbatasan
@@ -21,5 +20,5 @@
 - Metadata dan dukungan embed tiga video telah diverifikasi melalui oEmbed YouTube. Ketersediaan video dapat berubah dan pemutaran penuh pada semua perangkat belum diuji. Kesalahan runtime menampilkan tautan langsung sebagai cadangan.
 - Ilustrasi soal masih placeholder sesuai permintaan pengguna.
 - Login dan nilai bersifat lokal; bukan sistem penilaian server.
-- Model game ideal memiliki penyederhanaan yang dijelaskan dalam UI dan README.
+- Game trampolin adalah konteks bermain, bukan simulasi mekanika trampolin atau model peluncur pegas numerik.
 - Telaah guru/dosen terhadap media, redaksi soal, dan tujuan pembelajaran tetap diperlukan sebelum dipakai dalam kelas.
