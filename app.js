@@ -2,6 +2,7 @@ import {topics,questions,EBOOK,outcomeText} from './content.js';
 import {KINDS,LEVELS,freshProgress,simulate,score,answerOnce,advance} from './core.js';
 import {heroArt,lessonArt,scene,bouncie,coil} from './visuals.js';
 import * as store from './store.js';
+import {mountVideos,cleanupVideos} from './videos.js';
 
 const main=document.querySelector('#main'),header=document.querySelector('#header'),modal=document.querySelector('#modal');
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -20,7 +21,7 @@ function renderHeader(){
  header.innerHTML=`<div class="topbar"><a class="brand" href="#" data-action="${locked?'brand-locked':'home'}">${logo()}</a><div class="header-actions">${u?`<span class="name tiny">Hi, ${esc(u.name.split(' ')[0])}</span><span class="avatar" aria-hidden="true">${esc(u.name[0].toUpperCase())}</span>`:''}<button class="icon-btn" data-action="settings" aria-label="Pengaturan aksesibilitas" title="Pengaturan">⚙</button>${u?'<button class="icon-btn" data-action="logout" aria-label="Keluar" title="Keluar">↪</button>':''}</div></div>`;
 }
 function navigate(next){
- stopSpeech();cancelAnimationFrame(animation);animationGeneration++;busy=false;
+ stopSpeech();cleanupVideos();cancelAnimationFrame(animation);animationGeneration++;busy=false;
  route=store.user()?next:'auth';
  if(route==='auth')renderAuth();if(route==='dashboard')renderDashboard();if(route==='learn')renderLearn();if(route==='game')renderGame();
  renderHeader();window.scrollTo(0,0);main.focus({preventScroll:true});
@@ -51,7 +52,8 @@ function renderDashboard(){
 }
 function renderLearn(){
  main.innerHTML=`<div class="shell"><button class="quiet back" data-action="home">← Back to Dashboard</button><div class="screen-intro"><span class="eyebrow">Learning Library · Fisika SMA XI</span><h1>Elastisitas Bahan pada Pegas</h1><p class="muted">Baca pelan-pelan, dengarkan penjelasannya, dan hubungkan setiap konsep dengan percobaan pegasmu.</p></div><nav class="lesson-nav" aria-label="Daftar submateri">${topics.map((t,i)=>`<a href="#topic-${i}">${i+1}. ${esc(t.title)}</a>`).join('')}</nav><div class="lesson-list">${topics.map((t,i)=>`<article class="panel lesson" id="topic-${i}"><div class="lesson-title"><span class="topic-num">${i+1}</span><div><span class="eyebrow">${esc(t.tag)}</span><h2>${esc(t.title)}</h2></div></div><div class="lesson-grid"><div class="lesson-copy">${t.paragraphs.map(p=>`<p>${esc(p)}</p>`).join('')}${t.formula?`<div class="formula">${esc(t.formula)}</div><p class="example">${esc(t.example)}</p>`:''}</div><div class="lesson-visual">${lessonArt(t.visual)}</div></div><div class="takeaway">💡 ${esc(t.takeaway)}</div><div class="audio-box" data-topic="${i}"><div><div class="audio-label">🔊 Dengarkan materi</div><div class="audio-status" id="speech-${i}" aria-live="polite">Siap diputar</div></div><div class="row"><button data-action="speak" data-topic="${i}" aria-label="Putar narasi ${esc(t.title)}">▶ Putar</button><button data-action="pause-speech" data-topic="${i}" aria-label="Jeda narasi ${esc(t.title)}">⏸ Jeda</button><button data-action="stop-speech" data-topic="${i}" aria-label="Hentikan narasi ${esc(t.title)}">■ Stop</button><label class="tiny" for="rate-${i}">Kecepatan</label><select id="rate-${i}" data-rate="${i}">${[0.75,1,1.25,1.5].map(r=>`<option value="${r}" ${Number(pref.rate||1)===r?'selected':''}>${r}×</option>`).join('')}</select></div></div><div class="video"><h3>🎬 Tonton penjelasan</h3><p>Jelajahi video Bahasa Indonesia tentang ${esc(t.title.toLowerCase())}. Pemutaran tersemat belum diverifikasi, jadi tautan pencarian disediakan agar tidak menampilkan player yang rusak.</p><a class="quiet" href="https://www.youtube.com/results?search_query=${encodeURIComponent(t.query)}" target="_blank" rel="noopener noreferrer">Cari video di YouTube ↗</a></div><p class="source">Rujukan: Modul Elastisitas Bahan (2020), ${t.pages}. Ringkasan dan ilustrasi disusun ulang untuk pembelajaran ini.</p></article>`).join('')}</div><section class="panel ebook"><div><span class="eyebrow" style="color:#bce876">Read a little further</span><h2>Unduh E-Book Elastisitas Bahan</h2><p>Modul resmi Direktorat SMA, Kemendikbud (2020). Perluas pemahamanmu tentang elastisitas dan pegas.</p></div><a class="btn yellow" href="${EBOOK}" target="_blank" rel="noopener noreferrer">↓ Buka / Unduh PDF</a></section></div>`;
- if(!('speechSynthesis' in window)){for(const btn of $$('.audio-box button'))btn.disabled=true;for(const badge of $$('.audio-status'))badge.textContent='Audio tidak didukung browser ini. Teks tetap tersedia.';}
+ mountVideos(main,stopSpeech);
+ if(typeof window.speechSynthesis?.speak!=='function'||typeof window.SpeechSynthesisUtterance!=='function'){for(const btn of $$('.audio-box button'))btn.disabled=true;for(const badge of $$('.audio-status'))badge.textContent='Audio tidak didukung browser ini. Teks tetap tersedia.';}
 }
 let speechIndex=null,speechToken=0,utterance=null;
 function statusSpeech(index,text){const node=$(`#speech-${index}`);if(node)node.textContent=text;}
@@ -179,7 +181,7 @@ document.addEventListener('change',e=>{
  if(node.dataset.pref){pref[node.dataset.pref]=node.checked;store.savePrefs(pref);applyPrefs();}
  if(node.dataset.rate!==undefined){pref.rate=Number(node.value);store.savePrefs(pref);if(speechIndex===Number(node.dataset.rate))speak(speechIndex);}
 });
-window.addEventListener('pagehide',()=>{stopSpeech();cancelAnimationFrame(animation);});
+window.addEventListener('pagehide',()=>{stopSpeech();cleanupVideos();cancelAnimationFrame(animation);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&speechIndex!==null){speechSynthesis.pause();statusSpeech(speechIndex,'Narasi dijeda. Tekan Putar untuk melanjutkan.');}});
 // Browser back/forward cannot reopen a past checkpoint: the persisted state is authoritative.
 window.addEventListener('popstate',()=>{if(route==='game'){game=store.progress();renderGame();renderHeader();}});

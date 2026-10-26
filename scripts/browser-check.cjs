@@ -24,7 +24,7 @@ async function run(){
   await page.setViewportSize({width,height:900});check(`Dashboard tanpa overflow ${width}px`,await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   if(width===375)await page.screenshot({path:'artifacts/dashboard-mobile.png',fullPage:true});
  }
- await page.locator('[data-action=learn]').click();check('Lima submateri',await page.locator('.lesson').count()===5);check('Lima kelompok audio dan video cadangan',await page.locator('.audio-box').count()===5&&await page.locator('.video a').count()===5);
+ await page.locator('[data-action=learn]').click();check('Lima submateri',await page.locator('.lesson').count()===5);check('Lima kelompok audio dan video dengan tautan cadangan',await page.locator('.audio-box').count()===5&&await page.locator('.video a').count()===5&&await page.locator('.video-load').count()===5);
  check('E-book resmi',await page.locator('.ebook a').getAttribute('href').then(s=>s.includes('repositori.kemendikdasmen.go.id')));
  await page.setViewportSize({width:375,height:812});check('Materi tanpa overflow 375px',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  await page.locator('[data-action=settings]').click();await page.locator('#pref-large').check();await page.locator('#pref-contrast').check();await page.locator('#pref-reduce').check();await page.locator('#modal [data-action=close-modal]').last().click();

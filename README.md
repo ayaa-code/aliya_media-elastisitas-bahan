@@ -20,7 +20,7 @@ Buka http://127.0.0.1:5180. Buat akun demo melalui **Create account**, lalu masu
 - Dashboard berbahasa Inggris dengan tepat dua kartu: Learn & Explore dan Spring Quest.
 - Lima submateri: benda elastis/plastis, pertambahan panjang, Hukum Hooke, konstanta pegas, serta batas elastis dan energi potensial.
 - Narasi per submateri: putar, jeda, stop, kecepatan 0.75–1.5×. Ketersediaan suara Indonesia bergantung pada browser/perangkat.
-- Tautan pencarian YouTube per topik dan e-book resmi Kemendikbud. Pemutaran tersemat belum dapat diverifikasi; aplikasi menggunakan kartu cadangan yang berfungsi tanpa player rusak.
+- Video YouTube per topik dan e-book resmi Kemendikbud. Tiga video relevan diverifikasi melalui oEmbed YouTube dan digunakan pada lima submateri. Video hanya dimuat saat tombol dipilih, tanpa autoplay. Kesalahan pemutar menampilkan tautan cadangan.
 - Game lima level: massa total 200–600 g, tiga pegas (80/140/220 N/m), pemampatan 4–30 cm.
 - Satu peluncuran di setiap level, dilanjut checkpoint meski lompatan gagal.
 - Lima soal PG A–E; satu jawaban per soal, dikunci dan disimpan sebelum feedback. Benar 20, salah 0, maksimum 100.
@@ -65,6 +65,7 @@ Kelima soal merupakan adaptasi konsep untuk game, bukan salinan verbatim lima no
 | core.js | Model fisika dan mesin status progres |
 | store.js | Akun demo, sesi, preferensi, progres |
 | visuals.js | SVG orisinal Bouncie, diagram, dan dunia game |
+| videos.js | Pemutar YouTube dengan tautan cadangan |
 | scripts/serve.mjs | Server lokal |
 | tests/core.test.js | Pengujian fisika dan kunci progres |
 | scripts/browser-check.cjs | Pengujian browser end-to-end |
@@ -84,6 +85,10 @@ Lihat docs/PENGUJIAN.md untuk cakupan dan batas pengujian.
 
 Repository tujuan: https://github.com/ayaa-code/aliya_media-elastisitas-bahan
 
+Website publik: https://stretch-measure.vercel.app
+
+Deploy CLI sudah berhasil. Penyambungan otomatis GitHub ke Vercel ditolak oleh izin akun Vercel terhadap repository ini, sehingga push GitHub belum memicu deploy otomatis. Untuk mengaktifkannya, buka Project Settings → Git pada Vercel, hubungkan akun GitHub dengan akses ke repository tujuan, lalu pilih repository tersebut. Aplikasi publik tetap dapat digunakan melalui deployment langsung.
+
 Untuk impor Vercel: pilih repository tersebut, Framework Preset **Other**, Root Directory `.`, tanpa build command, Output Directory `.`. Ini aplikasi statis tanpa server backend atau secret. vercel.json menyertakan header pembatas kamera/mikrofon dan pengaturan statis.
 
 Jika memakai CLI yang sudah login:
@@ -101,3 +106,8 @@ Nas­ukha Z. (2020). *Elastisitas Bahan: Fisika Kelas XI*. Direktorat SMA, Kemen
 Modul 2020 menggunakan KD, bukan CP Kurikulum Merdeka. Kesesuaian penempatan di kelas mengikuti ATP sekolah; modul dipakai sebagai sumber konsep, bukan diklaim buku Kurikulum Merdeka terbaru.
 
 Ilustrasi SVG, maskot, dan mekanik aplikasi dibuat khusus untuk proyek ini. Font Nunito melalui Google Fonts, dengan font sistem sebagai cadangan. Tautan YouTube memerlukan internet. Proyek dikembangkan dengan bantuan AI; pemilik tugas perlu menelaah dan menyatakan penggunaannya sesuai ketentuan UTS.
+
+Video pendukung (metadata dan dukungan embed diverifikasi 26 Oktober 2026):
+- Fadilla Ramadhani: https://www.youtube.com/watch?v=5Hq3EGzkKds
+- Iqbal Noviansyah: https://www.youtube.com/watch?v=iydokKuQb4E
+- Toto Study: https://www.youtube.com/watch?v=fWCmPv9gX2U
