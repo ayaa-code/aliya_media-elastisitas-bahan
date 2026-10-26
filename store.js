@@ -32,4 +32,4 @@ export function progress(){return restoreProgress(db.progress[current?.id]);}
 export function saveProgress(p){if(current){db.progress[current.id]=structuredClone(p);save();}}
 export function resetProgress(){saveProgress(freshProgress());}
 export const prefs=()=>db.prefs;
-export function savePrefs(p){db.prefs={...db.prefs,...p};save();}
+export function savePrefs(p){db.prefs={...p};save();}

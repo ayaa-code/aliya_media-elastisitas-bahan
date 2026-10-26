@@ -26,9 +26,9 @@ export const topics=[
  {title:'Batas elastis dan energi pegas',tag:'05 · Simpan energi, kenali batasnya',visual:'energy',
   paragraphs:['Jika batas elastis dilampaui, pegas dapat mengalami perubahan bentuk permanen. Batas berlakunya hubungan linear (batas proporsional) tidak selalu sama dengan batas elastis. Benda bisa tetap elastis walaupun hubungan gaya dan panjangnya tidak lagi linear.',
   'Pegas ideal yang ditarik atau dimampatkan menyimpan energi potensial elastis: Eₚ = ½k(Δx)². Satuannya joule (J). Untuk pegas yang sama, perubahan panjang dua kali lebih besar menyimpan energi empat kali lebih besar, selama masih dalam daerah linear.',
-  'Dalam Spring Quest, energi pegas diubah menjadi energi gerak Bouncie. Pada pemampatan dan massa yang sama, k lebih besar membuat laju awal lebih besar. Pada k dan pemampatan yang sama, massa lebih besar membuat laju awal lebih kecil.'],
+  'Pada pelontar pegas ideal, energi potensial dapat berubah menjadi energi gerak. Pada pemampatan dan massa yang sama, k lebih besar menghasilkan laju awal lebih besar. Pada k dan pemampatan yang sama, massa lebih besar menghasilkan laju awal lebih kecil. Game memakai konteks pegas sebagai petualangan; pemahaman konsep diperiksa melalui kuis.'],
   formula:'Eₚ = ½k(Δx)²',example:'k = 100 N/m, Δx = 0,10 m → Eₚ = 0,5 J.',
-  takeaway:'Batas pemampatan di game adalah asumsi model tiap pegas. Jangan menarik pegas fisik sampai rusak.',
+  takeaway:'Gunakan rumus energi dalam daerah linear pegas. Jangan menarik pegas fisik sampai rusak.',
   query:'energi potensial pegas batas elastis fisika kelas 11',pages:'hlm. 7, 22–23'}
 ];
 export const questions=[

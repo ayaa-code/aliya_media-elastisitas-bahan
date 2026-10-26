@@ -2,59 +2,63 @@
 
 Explore, Stretch, and Learn.
 
-## Versi perjalanan bergulir
-
-Mesin game aktif berada di journey.js: dunia 9.000 unit dengan lima bagian tersambung, kamera mengikuti pada x layar 350/960, rintangan batang kayu/batu, platform bergerak, pegas bantu, dan finish tunggal. Pengejar ungu berjalan mendekat; tertangkap −10 Adventure Points, jatuh/terbentur −5. Perlindungan sesudah respawn mencegah penalti berulang. Relaxed Mode tersedia sebelum mulai dan melalui Pause. Latar 3D buatan AI terpisah dari awan, pengunjung langit, pepohonan dekat, platform, karakter, dan pengejar SVG bergradasi.
-
-Learning Score kini khusus kuis (0–100). Adventure Points terpisah: rintangan +5 dan level +25, masing-masing hanya sekali. Progres versi 4 menyimpan checkpoint koordinat, jawaban, klaim bonus, mode dan poin; data lama dimigrasikan dengan jawaban dipertahankan. Pause menghentikan waktu dunia dan pengejar. Uji terbaru: scripts/journey-check.cjs dan scripts/chaser-check.cjs. Bagian di bawah menjelaskan evolusi awal game; mekanik skor terbaru mengikuti bagian ini.
-
-Media Fisika SMA XI tentang elastisitas bahan dan pegas. Akun demo, Learning Library dengan lima submateri/audio/video, dan permainan Bouncie’s Spring Trail.
+Media Fisika SMA XI: elastisitas bahan dan pegas. Antarmuka pastel dengan Bouncie bergaya 3D, Learning Library, serta petualangan platform Bouncie’s Spring Trail.
 
 ## Jalankan
 
-Gunakan Node.js modern lalu jalankan npm run dev. Buka http://127.0.0.1:5180. Daftarkan akun demo melalui Create account. Gunakan email contoh dan kata sandi khusus demo.
+Gunakan Node.js modern, jalankan npm run dev, kemudian buka http://127.0.0.1:5180. Daftarkan akun demo melalui Create account. Gunakan email contoh dan kata sandi khusus demo. Tidak perlu instalasi dependensi aplikasi. Membuka langsung melalui file:// tidak didukung.
 
-## Bouncie’s Spring Trail
+## Desain dan akses belajar
 
-Bouncie di game kini memakai sprite transparan bergaya 3D berdasarkan desain yang disetujui: 12 pose dalam atlas WebP sekitar 301 KiB. Tangan dan kaki berganti pose pada siklus berjalan empat frame; ada pose kedip, naik, turun, mendarat, senang, dan kaget. Ini animasi sprite, bukan model 3D real-time. Rincian frame, titik pijak, proses aset, dan prompt ada di docs/BOUNCIE-ASSETS.md.
+Login, registrasi, dashboard dan game memakai identitas Bouncie yang konsisten. Dashboard memiliki tepat dua kartu: Learn & Explore dan Bouncie’s Spring Trail. Ilustrasi buku/gamepad 3D menggantikan emoji standar. Password memakai tombol mata dengan label aksesibel.
 
-Bouncie perempuan berambut cokelat dengan kuncir dan ikat rambut kuning, kaus turquoise bergambar pegas, celana kuning, dan sepatu. Tahan A/D atau ←/→ untuk bergerak; Space, W, ↑, atau tombol Jump untuk melompat. Tombol sentuh dapat ditahan sambil menekan Jump.
+Bouncie menyapa dengan empat frame melambai dan bubble nama siswa, sekali saat dashboard dibuka. Sapa Bouncie memutar ulang. Kurangi gerak atau preferensi perangkat membuat sapaan statis. Pergantian halaman membuang loop sambutan.
 
-Lima level: First Steps, Little Leap, Springy Path, Careful Bounce, dan Final Trail. Platform rumput, celah pendek, rintangan balok, serta platform bergerak lambat di level akhir. Tidak ada double jump atau batas waktu.
+Nyaman untukmu menyediakan ukuran teks normal/besar/sangat besar, spasi baca, kontras tinggi, kurangi gerak, panduan fokus paragraf, bahasa UI Indonesia/English, panduan keyboard dan reset preferensi. Preferensi bertahan setelah refresh, terpisah dari akun dan progres. Materi, diagram dan soal tetap berbahasa Indonesia; bagian ilmiah diberi atribut bahasa.
 
-Setiap level memiliki tepat satu bintang kuis. Menyentuh bintang menjeda arena dan membuka soal A–E. Jawaban hanya sekali: benar +20, salah +0, dilanjutkan pembahasan. Continue Journey mengembalikan pemain ke pijakan aman. Capai bendera finish untuk beralih level. Jawaban kelima belum mengakhiri permainan sampai finish terakhir tercapai.
+## Materi dan soal
 
-Jatuh atau terkena rintangan mengembalikan Bouncie ke checkpoint dan mengurangi maksimal 5 poin yang tersedia. Skor permainan tidak negatif. Jumlah jawaban benar ditampilkan terpisah dari skor permainan sehingga hasil konsep tetap terlihat. Checkpoint, level, jawaban, dan skor tersimpan per akun. Reset memerlukan konfirmasi.
+Lima topik: benda elastis/plastis, pengaruh beban, Hukum Hooke, konstanta pegas, batas elastis dan energi potensial. Narasi mendukung putar/jeda/lanjut/stop serta kecepatan. Suara Indonesia bergantung perangkat. Video YouTube dimuat atas permintaan dengan tautan cadangan.
 
-## Materi dan aksesibilitas
+Lima Star Challenge kini memiliki gambar: satu cuplikan diagram pembebanan pegas dari hlm. 18 e-book dan empat SVG adaptasi konsep/data soal. Gambar dapat diperbesar dalam dialog terpisah. Escape menutup pembesaran tanpa menutup soal. Sumber, halaman dan alasan adaptasi tercatat di docs/SUMBER-ILUSTRASI-SOAL.md.
 
-Lima materi: benda elastis/plastis, pengaruh beban pada panjang pegas, Hukum Hooke, konstanta pegas, batas elastis dan energi potensial. Game adalah konteks bermain; konsep fisika dievaluasi melalui lima Star Challenge. Gambar soal masih placeholder sesuai permintaan.
+Modul resmi 2020 menggunakan KD, bukan buku CP Kurikulum Merdeka terbaru; penempatan pembelajaran mengikuti ATP sekolah. Materi dan instrumen tetap memerlukan telaah guru/dosen.
 
-Narasi mendukung putar/jeda/lanjut/stop dan kecepatan. Ketersediaan suara Indonesia bergantung perangkat. Video YouTube dimuat atas permintaan dengan tautan cadangan. E-book resmi: https://repositori.kemendikdasmen.go.id/22205/1/XI_Fisika_KD-3.2-_Final.pdf
+## Game
 
-Kontras tinggi, teks besar, dan Reduce motion tersedia. Kamera/mikrofon tidak dipakai. Belum diuji pada iPhone fisik atau bersama peserta didik; telaah guru/dosen tetap diperlukan.
+Dunia 9.000 unit, lima bagian tersambung, kamera pengikut, celah, batang kayu/batu, platform bergerak, pegas bantu, checkpoint dan finish tunggal. Tidak ada pengejar ungu atau mode pengejar.
 
-## Penyimpanan
+Tahan A/D atau ←/→ untuk bergerak, Space/W/↑ untuk lompat. Tombol arah dan Jump bisa disentuh bersamaan. Tidak ada double jump dan tidak ada batas waktu kuis.
 
-Akun demo lokal memakai PBKDF2-SHA256 dan salt acak. Ini bukan login sekolah berbasis server. Akun/progres hanya pada browser dan origin yang sama. Nilai lokal dapat dimodifikasi melalui alat pengembang. Sesi Remember me memakai localStorage, sesi lainnya sessionStorage. Jika penyimpanan ditolak, aplikasi menggunakan memori dan memberi pemberitahuan.
+Satu bintang per level membuka soal A–E. Jawaban hanya sekali dan langsung disimpan. Pembahasan diikuti Continue Journey. Semua waktu dunia berhenti saat dialog terbuka atau tab tersembunyi. Finish terakhir diperlukan untuk menyelesaikan petualangan.
+
+Learning Score: benar +20, salah +0, maksimum 100. Tidak dikurangi karena jatuh. Adventure Points: rintangan pertama kali +5, level +25, jatuh/terbentur −5, minimum 0. Klaim bonus tersimpan agar tidak berulang saat respawn atau refresh.
+
+## Akun dan progres
+
+Akun demo menggunakan digest PBKDF2-SHA256 dengan salt acak. Akun, progres dan nilai berada pada browser/origin yang sama; localhost berbeda dari domain Vercel. Nilai lokal dapat diedit melalui alat pengembang, sehingga bukan penilaian server. Remember me memakai localStorage, sesi lainnya sessionStorage.
+
+Progres menyimpan level, checkpoint koordinat, jawaban dan Adventure Points. Data lama yang kompatibel dipulihkan dengan jawaban dipertahankan; mode pengejar lama tidak dibaca. Reset game meminta konfirmasi dan hanya memengaruhi akun aktif. Reset preferensi tidak menghapus akun atau game.
 
 ## Pengujian
 
-npm test menjalankan uji status, skor, dan penguncian kuis. npm run check memeriksa sintaks. Pengujian browser terbaru: node scripts/trail-check.cjs (memerlukan Playwright melalui PLAYWRIGHT_MODULE dan Edge, server lokal aktif). Skrip browser-check.cjs dan access-check.cjs menyimpan pemeriksaan versi permainan lama.
+npm test: status, penguncian jawaban, pemulihan progres dan pemisahan skor.
+npm run check: sintaks semua modul aktif.
+
+Browser: scripts/redesign-check.cjs dan scripts/journey-check.cjs memakai Playwright/Edge melalui PLAYWRIGHT_MODULE, dengan server lokal aktif. Skrip pemeriksaan versi lama bukan acuan game saat ini. Laporan cakupan ada pada docs/PENGUJIAN.md.
 
 ## Publikasi
 
 Repository: https://github.com/ayaa-code/aliya_media-elastisitas-bahan
-
 Situs: https://stretch-measure.vercel.app
 
-Deploy langsung dari direktori stretch-measure: npx vercel --prod. Penyambungan otomatis GitHub–Vercel masih memerlukan izin repository pada akun Vercel. Buildless static website, output direktori titik, tanpa backend.
+Deploy langsung dari direktori stretch-measure: npx vercel --prod. Proyek statis tanpa build command/backend. Output direktori titik. Pengaitan otomatis GitHub ke Vercel masih memerlukan izin repository pada akun Vercel.
 
-## Sumber
+## Sumber dan aset
 
-Nasukha Z. (2020), Elastisitas Bahan: Fisika Kelas XI, Direktorat SMA Kemendikbud; halaman 7–9, 12, 18–20, 22–23. Modul menggunakan KD; penempatan Kurikulum Merdeka mengikuti ATP sekolah. Pertanyaan merupakan adaptasi konsep, bukan klaim salinan nomor soal modul.
+Direktorat SMA, Kemendikbud (2020), Modul Fisika XI KD 3.2: Elastisitas Bahan, hlm. 7–9, 12, 18–20, 22–23. E-book: https://repositori.kemendikdasmen.go.id/22205/1/XI_Fisika_KD-3.2-_Final.pdf
 
-Video: Fadilla Ramadhani (5Hq3EGzkKds), Iqbal Noviansyah (iydokKuQb4E), Toto Study (fWCmPv9gX2U). Metadata diperiksa 26 Oktober 2026, ketersediaan dapat berubah.
+Video: Fadilla Ramadhani (5Hq3EGzkKds), Iqbal Noviansyah (iydokKuQb4E), Toto Study (fWCmPv9gX2U). Metadata diperiksa 26 Oktober 2026; ketersediaan bisa berubah.
 
-SVG dan karakter dibuat untuk proyek ini. Font Nunito dari Google Fonts dengan fallback sistem. Proyek dikembangkan dengan bantuan AI; nyatakan penggunaannya sesuai ketentuan tugas.
+Aset AI dan prompt: docs/REDESIGN.md, docs/BOUNCIE-ASSETS.md, docs/JOURNEY-ASSETS.md. Font Nunito via Google Fonts dengan fallback sistem. Kamera dan mikrofon tidak dipakai. Pengembangan dibantu AI; pengguna perlu menyatakan pemanfaatannya sesuai ketentuan tugas.
 

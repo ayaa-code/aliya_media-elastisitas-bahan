@@ -1,0 +1,8 @@
+const sharp=require(process.env.SHARP_MODULE||'sharp');
+(async()=>{const [wave,book,pad]=process.argv.slice(2);if(wave){const meta=await sharp(wave).metadata(),parts=[];let scale;for(let i=0;i<4;i++){
+ const w=Math.floor(meta.width/2),edges=[0,520,1024].map(n=>Math.round(n*meta.height/1024)),row=Math.floor(i/2),h=edges[row+1]-edges[row];const raw=await sharp(wave).extract({left:i%2*w,top:edges[row],width:w,height:h}).ensureAlpha().raw().toBuffer();let l=w,t=h,r=0,b=0;for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(raw[(y*w+x)*4+3]>30){l=Math.min(l,x);r=Math.max(r,x);t=Math.min(t,y);b=Math.max(b,y);}if(i===0)scale=472/(b-t+1);let sum=0,count=0;for(let y=b-25;y<=b;y++)for(let x=l;x<=r;x++)if(raw[(y*w+x)*4+3]>100){sum+=x;count++;}const anchor=count?sum/count:(l+r)/2;const width=Math.round((r-l+1)*scale),height=Math.min(496,Math.round((b-t+1)*scale));const data=await sharp(raw,{raw:{width:w,height:h,channels:4}}).extract({left:l,top:t,width:r-l+1,height:b-t+1}).resize(width,height).png().toBuffer();parts.push({input:data,left:i%2*384+Math.round(192-(anchor-l)*scale),top:row*512+504-height});}
+ await sharp({create:{width:768,height:1024,channels:4,background:{r:0,g:0,b:0,alpha:0}}}).composite(parts).webp({quality:92,alphaQuality:100}).toFile('assets/bouncie-wave.webp');}
+ if(book)await sharp(book).trim().resize(420,320,{fit:'inside'}).webp({quality:90,alphaQuality:100}).toFile('assets/book-icon.webp');
+ if(pad)await sharp(pad).trim().resize(420,320,{fit:'inside'}).webp({quality:90,alphaQuality:100}).toFile('assets/game-icon.webp');
+ await sharp('artifacts/pdf/hi-18.png').extract({left:370,top:950,width:535,height:530}).webp({quality:95}).toFile('assets/questions/load.webp');
+})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -1,5 +1,5 @@
 const ASSET_URL=new URL('./assets/bouncie-atlas.webp',import.meta.url).href;
-export function spriteHero(){return `<svg viewBox="0 0 256 320" role="img" aria-label="Bouncie perempuan bergaya 3D, berkuncir dan berkaus gambar pegas"><image href="${ASSET_URL}" width="1024" height="960"/></svg>`;}
+export function spriteHero(){return `<svg viewBox="0 0 256 320" role="img" aria-label="Bouncie perempuan bergaya 3D, berkuncir dan berkaus gambar pegas"><svg width="256" height="320" viewBox="0 0 256 320" overflow="hidden"><image href="${ASSET_URL}" width="1024" height="960"/></svg></svg>`;}
 // Preload during the intro. If loading fails the original vector is kept as a fallback.
 const preload=new Promise(resolve=>{const image=new Image();const timer=setTimeout(()=>resolve(false),12000);image.onload=()=>{clearTimeout(timer);resolve(true);};image.onerror=()=>{clearTimeout(timer);resolve(false);};image.src=ASSET_URL;});
 export function mountBouncie(group){
