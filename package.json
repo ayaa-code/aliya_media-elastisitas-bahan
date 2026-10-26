@@ -1,0 +1,11 @@
+{
+  "name": "stretch-and-measure",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "test": "node --test tests/core.test.js",
+    "check": "node --check app.js && node --check content.js && node --check core.js && node --check visuals.js && node --check scripts/serve.mjs"
+  }
+}
